@@ -1,244 +1,121 @@
 <!DOCTYPE html>
-<html lang="es-MX">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venomstream Diamond | Elite Access</title>
-    
+    <title>VENOMSTREAM | Interface Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css">
     <style>
-        :root {
-            --v-emerald: #10b981;
-            --v-gold: #fbbf24;
-            --v-black: #050505;
-            --v-card: #111111;
-        }
-
-        body { background: var(--v-black); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-
-        /* --- SISTEMA PREMIUM GHOSTING --- */
-        .premium-locked { position: relative; filter: grayscale(0.5); }
-        .premium-locked::after {
-            content: '🏆 PREMIUM'; position: absolute; top: 10px; right: 10px;
-            background: var(--v-gold); color: black; font-size: 10px; font-weight: 900;
-            padding: 2px 6px; border-radius: 4px; z-index: 10;
-        }
-
-        /* --- NAVEGACIÓN PRO --- */
-        .v-nav {
-            position: fixed; top: 0; width: 100%; z-index: 1000;
-            padding: 15px 5%; display: flex; align-items: center; justify-content: space-between;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent);
-            transition: 0.4s;
-        }
-        .v-nav.scrolled { background: #000; border-bottom: 1px solid #222; }
-
-        /* --- BUSCADOR DINÁMICO --- */
-        #search-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.98); z-index: 2000; display: none;
-            flex-direction: column; align-items: center; padding-top: 100px;
-        }
-
-        .search-input {
-            width: 80%; max-width: 800px; background: transparent; border-bottom: 3px solid var(--v-emerald);
-            font-size: 3rem; color: white; outline: none; padding: 20px; font-weight: 900;
-        }
-
-        /* --- MODAL DE PAGO (PREMIUM) --- */
-        #premium-modal {
-            display: none; position: fixed; inset: 0; z-index: 5000;
-            background: rgba(0,0,0,0.9); align-items: center; justify-content: center;
-        }
-        .pay-card {
-            background: #111; border: 2px solid var(--v-gold); padding: 40px;
-            border-radius: 20px; text-align: center; max-width: 400px;
-        }
-
-        /* --- PLAYER INTERFACE --- */
-        #player-box {
-            display: none; position: fixed; inset: 0; z-index: 10000; background: #000;
-        }
-        iframe { width: 100%; height: 100%; border: none; }
-
+        body { background-color: #0a0a0a; color: white; font-family: 'Segoe UI', sans-serif; }
+        .movie-card { transition: transform 0.3s; cursor: pointer; position: relative; }
+        .movie-card:hover { transform: scale(1.1); z-index: 10; }
+        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 8px; overflow: hidden; display: none; margin-bottom: 2rem; border: 2px solid #e50914; }
+        .video-container iframe { width: 100%; height: 100%; border: 0; }
+        .search-bar { background: rgba(255,255,255,0.1); border: 1px solid #333; padding: 8px 15px; border-radius: 20px; width: 300px; outline: none; transition: 0.3s; }
+        .search-bar:focus { border-color: #e50914; background: rgba(255,255,255,0.2); }
     </style>
 </head>
-<body>
+<body class="pb-20">
 
-    <div id="search-container">
-        <button onclick="toggleSearch()" class="absolute top-10 right-10 text-4xl hover:text-emerald-500"><i class="fas fa-times"></i></button>
-        <input type="text" id="main-search" placeholder="Escribe el nombre..." class="search-input" onkeyup="executeSearch(this.value)">
-        <div id="search-results" class="flex flex-wrap gap-4 p-20 justify-center"></div>
-    </div>
-
-    <div id="premium-modal">
-        <div class="pay-card animate-bounce-short">
-            <i class="fas fa-crown text-6xl text-amber-400 mb-6"></i>
-            <h2 class="text-3xl font-black mb-4">ACCESO DIAMANTE</h2>
-            <p class="text-zinc-400 mb-8">Esta película solo está disponible para miembros Platinum de Venomstream.</p>
-            <button onclick="upgrade()" class="w-full bg-amber-500 text-black py-4 rounded-full font-black text-xl hover:bg-amber-400 transition">SUSCRIBIRSE POR $9.99</button>
-            <button onclick="closePremium()" class="mt-4 text-zinc-500 hover:text-white">Quizás más tarde</button>
-        </div>
-    </div>
-
-    <nav class="v-nav" id="navbar">
-        <div class="flex items-center gap-10">
-            <h1 class="text-4xl font-black italic text-emerald-500 cursor-pointer">VENOMSTREAM</h1>
-            <div class="hidden md:flex gap-6 text-sm font-bold text-zinc-400">
-                <a href="#" class="hover:text-white transition">INICIO</a>
-                <a href="#" class="hover:text-white transition">PELÍCULAS</a>
-                <a href="#" class="hover:text-white transition">PREMIUM</a>
-            </div>
-        </div>
-        <div class="flex items-center gap-8">
-            <i class="fas fa-search cursor-pointer text-xl hover:text-emerald-500" onclick="toggleSearch()"></i>
-            <div id="user-badge" class="flex items-center gap-2 bg-zinc-800 px-4 py-2 rounded-full border border-zinc-700">
-                <span id="user-status" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Free User</span>
-                <div class="w-6 h-6 bg-emerald-500 rounded-full"></div>
-            </div>
+    <nav class="fixed top-0 w-full z-50 bg-black/90 p-4 flex flex-wrap justify-between items-center border-b border-zinc-800">
+        <h1 class="text-2xl font-black text-red-600 tracking-tighter">VENOMSTREAM</h1>
+        <div class="flex items-center gap-4">
+            <input type="text" id="user-search" placeholder="Buscar películas o series..." class="search-bar text-sm">
+            <div class="text-[10px] bg-red-600 px-2 py-1 rounded font-bold">LIVE 2026</div>
         </div>
     </nav>
 
-    <section id="hero" class="h-screen w-full relative flex items-center px-[5%] bg-cover bg-center">
-        <div class="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+    <main class="mt-24 px-6 max-w-7xl mx-auto">
         
-        <div class="relative z-10 max-w-4xl">
-            <h2 id="hero-title" class="text-8xl font-black italic mb-6 leading-none"></h2>
-            <p id="hero-desc" class="text-xl text-zinc-300 mb-10 line-clamp-3 max-w-2xl"></p>
-            <div class="flex gap-6">
-                <button id="hero-play" class="bg-emerald-500 text-black px-12 py-5 rounded-xl flex items-center gap-4 font-black text-2xl hover:bg-emerald-400 transition transform hover:scale-105">
-                    <i class="fas fa-play"></i> REPRODUCIR
-                </button>
-                <button class="bg-white/10 backdrop-blur-md px-12 py-5 rounded-xl font-black text-2xl hover:bg-white/20 transition">MI LISTA</button>
-            </div>
+        <div id="player-section" class="video-container shadow-2xl shadow-red-900/20">
+            <iframe id="main-iframe" src="" allowfullscreen></iframe>
         </div>
-    </section>
 
-    <main class="relative z-20 px-[5%] -mt-32 pb-40 space-y-20">
-        <section>
-            <h3 class="text-2xl font-black mb-6 flex items-center gap-3">
-                <span class="w-1 h-8 bg-emerald-500"></span> ESTRENOS EXCLUSIVOS
+        <section class="mb-10">
+            <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <span class="w-1 h-6 bg-red-600"></span> ESTRENOS DESTACADOS
             </h3>
-            <div id="row-top" class="flex gap-4 overflow-x-auto pb-10 scrollbar-hide"></div>
+            <div id="hero-carousel" class="splide">
+                <div class="splide__track">
+                    <ul class="splide__list" id="carousel-list">
+                        </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-10">
+            <h3 class="text-lg font-bold mb-4 text-zinc-400">PELÍCULAS POPULARES</h3>
+            <div id="movies-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                </div>
         </section>
 
         <section>
-            <h3 class="text-2xl font-black mb-6 flex items-center gap-3">
-                <span class="w-1 h-8 bg-emerald-500"></span> TENDENCIAS LATINO
-            </h3>
-            <div id="row-trends" class="flex gap-4 overflow-x-auto pb-10 scrollbar-hide"></div>
+            <h3 class="text-lg font-bold mb-4 text-zinc-400">SERIES TENDENCIA</h3>
+            <div id="series-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                </div>
         </section>
+
     </main>
 
-    <div id="player-box">
-        <div class="h-[10vh] bg-zinc-950 flex items-center justify-between px-10 border-b border-zinc-800">
-            <button onclick="exitPlayer()" class="text-3xl"><i class="fas fa-arrow-left"></i></button>
-            <div class="text-center">
-                <h4 id="now-playing" class="font-black text-xl italic uppercase"></h4>
-                <div class="flex gap-2 justify-center">
-                    <span class="text-[10px] bg-emerald-500 text-black px-2 font-black">LATINO FORZADO</span>
-                    <span id="quality-tag" class="text-[10px] bg-zinc-700 px-2 font-black">1080P</span>
-                </div>
-            </div>
-            <div class="w-10"></div>
-        </div>
-        <div class="h-[90vh]">
-            <iframe id="venom-iframe" src="" allowfullscreen allow="autoplay"></iframe>
-        </div>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
     <script>
-        const API_KEY = 'b6f588916e25d4e0e285fcfc76541b58';
-        let isPremium = false;
+        const API_KEY = "8f192518e25d4e0e285fcfc76541b58";
+        const IMG_PATH = "https://image.tmdb.org/t/p/w500";
 
-        // --- SISTEMA DE INICIO ---
-        async function init() {
-            const res = await fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}&language=es-MX`);
-            const { results } = await res.json();
-            const top = results[0];
+        async function initApp() {
+            const movies = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=es-MX`).then(r => r.json());
+            const series = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${API_KEY}&language=es-MX`).then(r => r.json());
 
-            document.getElementById('hero').style.backgroundImage = `url('https://image.tmdb.org/t/p/original${top.backdrop_path}')`;
-            document.getElementById('hero-title').innerText = top.title || top.name;
-            document.getElementById('hero-desc').innerText = top.overview;
-            document.getElementById('hero-play').onclick = () => play(top.id, top.media_type, false);
+            // Llenar Carrusel
+            const carousel = document.getElementById('carousel-list');
+            movies.results.slice(0, 6).forEach(item => {
+                carousel.innerHTML += `
+                    <li class="splide__slide p-2">
+                        <div class="movie-card" onclick="play('movie', '${item.id}')">
+                            <img src="${IMG_PATH}${item.backdrop_path}" class="rounded-xl border border-zinc-800">
+                            <p class="mt-2 text-xs font-bold text-center">${item.title}</p>
+                        </div>
+                    </li>`;
+            });
 
-            loadRows('row-top', `https://api.themoviedb.org/3/movie/upcoming?api_key=${API_KEY}&language=es-MX`, true);
-            loadRows('row-trends', `https://api.themoviedb.org/3/trending/all/day?api_key=${API_KEY}&language=es-MX`, false);
+            new Splide('#hero-carousel', { type: 'loop', perPage: 3, gap: '10px', arrows: false, autoplay: true, breakpoints: { 640: { perPage: 1 } } }).mount();
+
+            // Llenar Grids
+            renderGrid(movies.results, 'movies-grid', 'movie');
+            renderGrid(series.results, 'series-grid', 'tv');
+
+            // Buscador funcional
+            document.getElementById('user-search').addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                document.querySelectorAll('.movie-card').forEach(card => {
+                    const title = card.getAttribute('data-title').toLowerCase();
+                    card.parentElement.style.display = title.includes(query) ? 'block' : 'none';
+                });
+            });
         }
 
-        async function loadRows(elementId, url, locked) {
-            const res = await fetch(url);
-            const { results } = await res.json();
-            const container = document.getElementById(elementId);
-
-            container.innerHTML = results.map(m => `
-                <div class="min-width-[300px] h-[170px] flex-shrink-0 cursor-pointer transition hover:scale-110 relative ${locked ? 'premium-locked' : ''}" 
-                     onclick="play(${m.id}, '${m.media_type || 'movie'}', ${locked})">
-                    <img src="https://image.tmdb.org/t/p/w500${m.backdrop_path}" class="w-full h-full object-cover rounded-lg">
-                    <div class="absolute bottom-0 left-0 p-4 text-xs font-black bg-gradient-to-t from-black w-full">${m.title || m.name}</div>
-                </div>
-            `).join('');
+        function renderGrid(data, containerId, type) {
+            const container = document.getElementById(containerId);
+            data.forEach(item => {
+                const title = item.title || item.name;
+                container.innerHTML += `
+                    <div class="movie-card" data-title="${title}" onclick="play('${type}', '${item.id}')">
+                        <img src="${IMG_PATH}${item.poster_path}" class="rounded-lg shadow-md border border-zinc-900">
+                        <p class="mt-2 text-[10px] text-zinc-500 truncate">${title}</p>
+                    </div>`;
+            });
         }
 
-        // --- FUNCIONES PREMIUM ---
-        function play(id, type, locked) {
-            if(locked && !isPremium) {
-                document.getElementById('premium-modal').style.display = 'flex';
-                return;
-            }
-
-            const frame = document.getElementById('venom-iframe');
-            // INYECCIÓN DE AUDIO LATINO NIVEL 2
-            // Usamos parámetros específicos de vidsrc para forzar pistas de audio alternativas
-            const langParams = "&audio_lang=es&native_audio=1&sub_lang=es";
-            frame.src = `https://vidsrc.to/embed/${type}/${id}?${langParams}`;
-            
-            document.getElementById('player-box').style.display = 'block';
-            document.getElementById('now-playing').innerText = "Cargando audio latino...";
-            document.body.style.overflow = 'hidden';
+        function play(type, id) {
+            const player = document.getElementById('player-section');
+            const iframe = document.getElementById('main-iframe');
+            player.style.display = 'block';
+            iframe.src = `https://vidsrc.to/embed/${type}/${id}`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function upgrade() {
-            isPremium = true;
-            document.getElementById('user-status').innerText = "Platinum Member";
-            document.getElementById('user-status').style.color = "#fbbf24";
-            document.getElementById('quality-tag').innerText = "4K ULTRA HD";
-            document.getElementById('quality-tag').style.background = "#fbbf24";
-            closePremium();
-            alert("¡Bienvenido a Venomstream Diamond! Todas las funciones desbloqueadas.");
-        }
-
-        // --- BUSCADOR REAL ---
-        function toggleSearch() {
-            const s = document.getElementById('search-container');
-            s.style.display = s.style.display === 'flex' ? 'none' : 'flex';
-        }
-
-        async function executeSearch(query) {
-            if(query.length < 3) return;
-            const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&query=${query}&language=es-MX`);
-            const { results } = await res.json();
-            
-            document.getElementById('search-results').innerHTML = results.filter(m => m.backdrop_path).map(m => `
-                <div class="w-[200px] h-[110px] cursor-pointer" onclick="play(${m.id}, '${m.media_type}', false)">
-                    <img src="https://image.tmdb.org/t/p/w500${m.backdrop_path}" class="rounded border hover:border-emerald-500">
-                    <p class="text-[10px] mt-1 truncate">${m.title || m.name}</p>
-                </div>
-            `).join('');
-        }
-
-        function exitPlayer() {
-            document.getElementById('player-box').style.display = 'none';
-            document.getElementById('venom-iframe').src = "";
-            document.body.style.overflow = 'auto';
-        }
-
-        function closePremium() { document.getElementById('premium-modal').style.display = 'none'; }
-
-        init();
+        initApp();
     </script>
 </body>
 </html>
