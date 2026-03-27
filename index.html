@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>NexusFlix | Catálogo Ultra HD</title>
+    <title>VenomStream | Películas y Series en Español</title>
     <!-- Tailwind + Font Awesome + Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -47,14 +47,6 @@
         }
         .swiper-button-next:after, .swiper-button-prev:after { font-size: 1.2rem !important; font-weight: bold; }
         .swiper-button-disabled { opacity: 0.3; }
-        .rating-badge {
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
-            font-weight: 800;
-            font-size: 0.75rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 30px;
-        }
         .modal-backdrop {
             position: fixed;
             inset: 0;
@@ -94,10 +86,10 @@
             border: none;
             border-radius: 1rem;
         }
-        .server-btn {
+        .server-btn, .lang-btn {
             transition: all 0.2s;
         }
-        .server-btn.active {
+        .server-btn.active, .lang-btn.active {
             background-color: #10b981;
             color: black;
             border-color: #10b981;
@@ -119,8 +111,8 @@
     <header class="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-emerald-900/40 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-2">
-                <i class="fa-solid fa-clapperboard text-3xl text-emerald-400"></i>
-                <h1 class="text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Nexus<span class="text-white">Flix</span></h1>
+                <i class="fa-solid fa-bolt text-3xl text-emerald-400"></i>
+                <h1 class="text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">Venom<span class="text-white">Stream</span></h1>
             </div>
             <div class="flex flex-1 max-w-lg w-full md:w-auto relative">
                 <input type="text" id="searchInput" placeholder="Buscar películas, series, actores..." class="w-full bg-gray-900/80 border border-gray-700 rounded-full py-3 pl-12 pr-4 text-white placeholder:text-gray-400 focus:outline-none focus:border-emerald-500 transition">
@@ -147,7 +139,7 @@
         <!-- Loader global -->
         <div id="globalLoader" class="flex justify-center items-center py-20 flex-col gap-4">
             <div class="w-14 h-14 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-gray-400 font-medium">Cargando catálogo estelar...</p>
+            <p class="text-gray-400 font-medium">Cargando catálogo VenomStream...</p>
         </div>
     </main>
 
@@ -177,31 +169,38 @@
         </div>
     </div>
 
-    <!-- MODAL REPRODUCTOR CON SELECTOR DE SERVIDORES -->
+    <!-- MODAL REPRODUCTOR CON SELECTOR DE SERVIDORES Y IDIOMA -->
     <div id="playerModal" class="modal-backdrop">
         <div class="modal-container p-4 w-[95%] max-w-5xl">
             <div class="flex justify-between items-center pb-3 flex-wrap gap-2">
                 <h3 class="font-bold text-xl text-emerald-400"><i class="fas fa-tv mr-2"></i> <span id="playerTitle">Reproduciendo</span></h3>
                 <div class="flex gap-2">
-                    <button id="server1Btn" class="server-btn bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-xs font-bold transition">Servidor 1</button>
-                    <button id="server2Btn" class="server-btn bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-xs font-bold transition">Servidor 2</button>
+                    <button id="server1Btn" class="server-btn bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-xs font-bold transition">Server 1</button>
+                    <button id="server2Btn" class="server-btn bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-xs font-bold transition">Server 2</button>
+                    <button id="server3Btn" class="server-btn bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-xs font-bold transition">Server 3</button>
+                </div>
+                <div class="flex gap-2">
+                    <button id="langEsBtn" class="lang-btn bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-xs font-bold transition">Español</button>
+                    <button id="langEnBtn" class="lang-btn bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-xs font-bold transition">Inglés</button>
                 </div>
                 <button id="closePlayerBtn" class="text-white text-2xl bg-gray-800 w-8 h-8 rounded-full hover:bg-red-600 transition">&times;</button>
             </div>
             <div class="embed-container bg-black rounded-xl" style="min-height: 450px;">
                 <iframe id="playerIframe" src="" allowfullscreen allow="autoplay; encrypted-media" class="w-full h-[60vh] md:h-[70vh]"></iframe>
             </div>
-            <p class="text-center text-xs text-gray-400 mt-3">Cambia de servidor si el video no carga • Calidad HD</p>
+            <p class="text-center text-xs text-gray-400 mt-3">
+                <i class="fas fa-language text-emerald-400 mr-1"></i> Selecciona el idioma antes de reproducir. Si el audio no aparece en español, cambia de servidor o selecciona dentro del reproductor.
+            </p>
         </div>
     </div>
 
     <footer class="text-center text-gray-500 text-xs py-8 border-t border-gray-800 mt-10">
-        NexusFlix © Demo educativa • Datos por TMDB • Contenido solo para referencia
+        VenomStream © • Todos los contenidos son propiedad de sus respectivos dueños • Audio en español disponible en la mayoría de los servidores.
     </footer>
 
     <script>
         // ================= CONFIGURACIÓN =================
-        const API_KEY = 'b6f588916e25d4e0e285fcfc76541b58';   // TU NUEVA API KEY
+        const API_KEY = 'b6f588916e25d4e0e285fcfc76541b58';
         const BASE_IMG = 'https://image.tmdb.org/t/p/w500';
         const LANGUAGE = 'es-MX';
 
@@ -227,18 +226,20 @@
         const playerTitleSpan = document.getElementById('playerTitle');
         const server1Btn = document.getElementById('server1Btn');
         const server2Btn = document.getElementById('server2Btn');
+        const server3Btn = document.getElementById('server3Btn');
+        const langEsBtn = document.getElementById('langEsBtn');
+        const langEnBtn = document.getElementById('langEnBtn');
 
         let currentMediaId = null;
         let currentMediaType = 'movie';
         let currentTitle = '';
+        let currentLanguage = 'es'; // es o en
 
-        // Helper para mostrar/ocultar loader
         function showLoader(show) {
             if(show) globalLoader.classList.remove('hidden');
             else globalLoader.classList.add('hidden');
         }
 
-        // Cerrar modales
         function closeAllModals() {
             detailModal.classList.remove('active');
             playerModal.classList.remove('active');
@@ -254,7 +255,6 @@
         detailModal.onclick = (e) => { if(e.target === detailModal) closeAllModals(); };
         playerModal.onclick = (e) => { if(e.target === playerModal) closeAllModals(); };
 
-        // Obtener detalles (incluye videos para trailer)
         async function fetchDetails(id, type) {
             const endpoint = `https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&language=${LANGUAGE}&append_to_response=videos`;
             try {
@@ -264,7 +264,6 @@
             } catch(e) { console.error(e); return null; }
         }
 
-        // Abrir modal de detalles
         async function openDetailModal(item) {
             const mediaId = item.id;
             const mediaType = item.media_type || (item.title ? 'movie' : 'tv');
@@ -287,13 +286,11 @@
             document.getElementById('modalYear').innerText = releaseYear;
             document.getElementById('modalType').innerText = mediaType === 'movie' ? 'Película' : 'Serie';
             document.getElementById('modalOverview').innerText = details.overview || 'Sin sinopsis disponible.';
-            // Limpiar trailer
             trailerFrameDiv.classList.add('hidden');
             trailerFrameDiv.innerHTML = '';
             detailModal.classList.add('active');
         }
 
-        // Trailer
         trailerBtn.onclick = async () => {
             if(!currentMediaId) return;
             const details = await fetchDetails(currentMediaId, currentMediaType);
@@ -309,50 +306,109 @@
             }
         };
 
-        // Reproductor con servidores
+        // Función para construir URL con parámetros de idioma
+        function buildEmbedUrl(serverNum, language) {
+            if(!currentMediaId || !currentMediaType) return '';
+            let baseUrl = '';
+            if(serverNum === 1) {
+                // vidsrc.pro
+                if(currentMediaType === 'movie') {
+                    baseUrl = `https://vidsrc.pro/embed/movie/${currentMediaId}`;
+                } else {
+                    baseUrl = `https://vidsrc.pro/embed/tv/${currentMediaId}/1/1`;
+                }
+                if(language === 'es') {
+                    return `${baseUrl}?audio_lang=es&native_audio=1&primary_audio=latino`;
+                } else {
+                    return baseUrl;
+                }
+            } else if(serverNum === 2) {
+                // superembed.me (sin parámetros conocidos, pero intentamos agregar)
+                if(currentMediaType === 'movie') {
+                    baseUrl = `https://superembed.me/movie/${currentMediaId}`;
+                } else {
+                    baseUrl = `https://superembed.me/tv/${currentMediaId}/1/1`;
+                }
+                // No hay soporte oficial, pero agregamos un parámetro que a veces funciona
+                if(language === 'es') {
+                    return `${baseUrl}?audio=es&language=es`;
+                } else {
+                    return baseUrl;
+                }
+            } else {
+                // vidsrc.cc
+                if(currentMediaType === 'movie') {
+                    baseUrl = `https://vidsrc.cc/v2/embed/movie/${currentMediaId}`;
+                } else {
+                    baseUrl = `https://vidsrc.cc/v2/embed/tv/${currentMediaId}/1/1`;
+                }
+                if(language === 'es') {
+                    return `${baseUrl}?audio_lang=es&primary_audio=latino&native_audio=1`;
+                } else {
+                    return baseUrl;
+                }
+            }
+        }
+
         let currentServer = 1;
         function setServer(serverNum) {
             currentServer = serverNum;
-            if(serverNum === 1) {
-                server1Btn.classList.add('active', 'bg-emerald-500', 'text-black');
-                server2Btn.classList.remove('active', 'bg-emerald-500', 'text-black');
-                server2Btn.classList.add('bg-gray-800');
+            [server1Btn, server2Btn, server3Btn].forEach((btn, idx) => {
+                if(idx+1 === serverNum) {
+                    btn.classList.add('active', 'bg-emerald-500', 'text-black');
+                    btn.classList.remove('bg-gray-800');
+                } else {
+                    btn.classList.remove('active', 'bg-emerald-500', 'text-black');
+                    btn.classList.add('bg-gray-800');
+                }
+            });
+            if(playerModal.classList.contains('active')) {
+                loadEmbed();
+            }
+        }
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            if(lang === 'es') {
+                langEsBtn.classList.add('active', 'bg-emerald-500', 'text-black');
+                langEnBtn.classList.remove('active', 'bg-emerald-500', 'text-black');
+                langEnBtn.classList.add('bg-gray-800');
             } else {
-                server2Btn.classList.add('active', 'bg-emerald-500', 'text-black');
-                server1Btn.classList.remove('active', 'bg-emerald-500', 'text-black');
-                server1Btn.classList.add('bg-gray-800');
+                langEnBtn.classList.add('active', 'bg-emerald-500', 'text-black');
+                langEsBtn.classList.remove('active', 'bg-emerald-500', 'text-black');
+                langEsBtn.classList.add('bg-gray-800');
             }
             if(playerModal.classList.contains('active')) {
                 loadEmbed();
             }
         }
+
         function loadEmbed() {
-            if(!currentMediaId || !currentMediaType) return;
-            let embedUrl = '';
-            if(currentServer === 1) {
-                if(currentMediaType === 'movie') {
-                    embedUrl = `https://vidsrc.pro/embed/movie/${currentMediaId}`;
-                } else {
-                    embedUrl = `https://vidsrc.pro/embed/tv/${currentMediaId}/1/1`; // primer capítulo
-                }
+            const url = buildEmbedUrl(currentServer, currentLanguage);
+            if(url) {
+                playerIframe.src = url;
             } else {
-                // Servidor 2: superembed (confiable)
-                if(currentMediaType === 'movie') {
-                    embedUrl = `https://superembed.me/movie/${currentMediaId}`;
-                } else {
-                    embedUrl = `https://superembed.me/tv/${currentMediaId}/1/1`;
-                }
+                playerIframe.src = '';
+                console.warn('No se pudo construir URL');
             }
-            playerIframe.src = embedUrl;
         }
+
         watchNowBtn.onclick = () => {
             if(!currentMediaId || !currentMediaType) return;
             playerTitleSpan.innerText = currentTitle;
             playerModal.classList.add('active');
             loadEmbed();
         };
-        server1Btn.onclick = () => { setServer(1); };
-        server2Btn.onclick = () => { setServer(2); };
+
+        server1Btn.onclick = () => setServer(1);
+        server2Btn.onclick = () => setServer(2);
+        server3Btn.onclick = () => setServer(3);
+        langEsBtn.onclick = () => setLanguage('es');
+        langEnBtn.onclick = () => setLanguage('en');
+
+        // Inicializar servidor e idioma por defecto
+        setServer(1);
+        setLanguage('es');
 
         // ================= CARRUSELES =================
         async function fetchCategory(endpoint, label, key) {
