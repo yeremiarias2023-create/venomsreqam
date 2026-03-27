@@ -1,121 +1,260 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VENOMSTREAM | Interface Pro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css">
-    <style>
-        body { background-color: #0a0a0a; color: white; font-family: 'Segoe UI', sans-serif; }
-        .movie-card { transition: transform 0.3s; cursor: pointer; position: relative; }
-        .movie-card:hover { transform: scale(1.1); z-index: 10; }
-        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 8px; overflow: hidden; display: none; margin-bottom: 2rem; border: 2px solid #e50914; }
-        .video-container iframe { width: 100%; height: 100%; border: 0; }
-        .search-bar { background: rgba(255,255,255,0.1); border: 1px solid #333; padding: 8px 15px; border-radius: 20px; width: 300px; outline: none; transition: 0.3s; }
-        .search-bar:focus { border-color: #e50914; background: rgba(255,255,255,0.2); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STREAMIX ULTRA</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4/dist/css/splide.min.css">
+
+<style>
+body { background:#0b0b0b; color:white; font-family:system-ui; }
+
+/* CARD */
+.card { transition:.3s; cursor:pointer; position:relative; }
+.card:hover { transform:scale(1.1); z-index:10; }
+
+.overlay {
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    padding:10px;
+    background:linear-gradient(transparent, rgba(0,0,0,0.9));
+    opacity:0;
+    transition:.3s;
+}
+.card:hover .overlay { opacity:1; }
+
+/* HERO */
+.hero {
+    height:60vh;
+    background-size:cover;
+    background-position:center;
+    display:flex;
+    align-items:end;
+    padding:40px;
+}
+
+/* MODAL */
+.modal {
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.9);
+    display:none;
+    justify-content:center;
+    align-items:center;
+}
+
+/* SKELETON */
+.skeleton {
+    background:linear-gradient(90deg,#111,#222,#111);
+    animation:load 1.5s infinite;
+}
+@keyframes load {
+    0%{background-position:-200px}
+    100%{background-position:200px}
+}
+</style>
 </head>
-<body class="pb-20">
 
-    <nav class="fixed top-0 w-full z-50 bg-black/90 p-4 flex flex-wrap justify-between items-center border-b border-zinc-800">
-        <h1 class="text-2xl font-black text-red-600 tracking-tighter">VENOMSTREAM</h1>
-        <div class="flex items-center gap-4">
-            <input type="text" id="user-search" placeholder="Buscar películas o series..." class="search-bar text-sm">
-            <div class="text-[10px] bg-red-600 px-2 py-1 rounded font-bold">LIVE 2026</div>
-        </div>
-    </nav>
+<body>
 
-    <main class="mt-24 px-6 max-w-7xl mx-auto">
-        
-        <div id="player-section" class="video-container shadow-2xl shadow-red-900/20">
-            <iframe id="main-iframe" src="" allowfullscreen></iframe>
-        </div>
+<!-- NAV -->
+<nav class="fixed w-full z-50 bg-black/90 p-4 flex justify-between items-center border-b border-zinc-800">
+<h1 class="text-2xl font-black text-red-600">STREAMIX+</h1>
 
-        <section class="mb-10">
-            <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
-                <span class="w-1 h-6 bg-red-600"></span> ESTRENOS DESTACADOS
-            </h3>
-            <div id="hero-carousel" class="splide">
-                <div class="splide__track">
-                    <ul class="splide__list" id="carousel-list">
-                        </ul>
-                </div>
+<div class="flex gap-3 items-center">
+<input id="search" placeholder="Buscar..." class="bg-zinc-800 px-4 py-2 rounded-full text-sm outline-none">
+<button onclick="showFavorites()" class="text-sm bg-red-600 px-3 py-1 rounded">❤️</button>
+</div>
+</nav>
+
+<!-- HERO -->
+<div id="hero" class="hero mt-16"></div>
+
+<main class="px-6 max-w-7xl mx-auto">
+
+<!-- CONTINUAR -->
+<section class="my-8">
+<h2 class="text-lg text-zinc-400 mb-3">Seguir viendo</h2>
+<div id="continue" class="flex gap-4 overflow-x-auto"></div>
+</section>
+
+<!-- GENEROS -->
+<section class="mb-6">
+<h2 class="text-lg mb-2">Géneros</h2>
+<div id="genres" class="flex gap-2 flex-wrap"></div>
+</section>
+
+<!-- GRID -->
+<section>
+<h2 class="text-lg text-zinc-400 mb-4">Explorar</h2>
+<div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+</section>
+
+</main>
+
+<!-- MODAL PLAYER -->
+<div id="modal" class="modal">
+<div class="w-[90%] md:w-[70%] aspect-video">
+<iframe id="player" class="w-full h-full rounded-xl" allowfullscreen></iframe>
+</div>
+<button onclick="closePlayer()" class="absolute top-5 right-5 text-white text-xl">✖</button>
+</div>
+
+<script>
+const API="https://api.themoviedb.org/3";
+const KEY="TU_API_KEY_AQUI";
+const IMG="https://image.tmdb.org/t/p/w500";
+
+let favorites = JSON.parse(localStorage.getItem("fav")) || [];
+let continueWatching = JSON.parse(localStorage.getItem("cont")) || [];
+
+// INIT
+async function init(){
+    showSkeleton();
+
+    const movies = await fetch(`${API}/movie/popular?api_key=${KEY}&language=es`).then(r=>r.json());
+    const genres = await fetch(`${API}/genre/movie/list?api_key=${KEY}&language=es`).then(r=>r.json());
+
+    renderHero(movies.results[0]);
+    renderGrid(movies.results);
+    renderGenres(genres.genres);
+    renderContinue();
+}
+
+// HERO
+function renderHero(movie){
+    document.getElementById("hero").style.backgroundImage =
+    `linear-gradient(to top, #0b0b0b, transparent), url(${IMG+movie.backdrop_path})`;
+
+    document.getElementById("hero").innerHTML = `
+    <div>
+        <h1 class="text-3xl font-bold">${movie.title}</h1>
+        <p class="text-sm max-w-md mt-2">${movie.overview}</p>
+        <button onclick="play('movie',${movie.id})" class="mt-3 bg-red-600 px-4 py-2 rounded">▶ Ver</button>
+    </div>`;
+}
+
+// GRID
+function renderGrid(data){
+    const grid = document.getElementById("grid");
+    grid.innerHTML="";
+
+    data.forEach(item=>{
+        const fav = favorites.includes(item.id);
+
+        grid.innerHTML += `
+        <div class="card">
+            <img onclick="play('movie',${item.id})" src="${IMG+item.poster_path}" class="rounded-lg">
+            <div class="overlay text-xs flex justify-between">
+                <span>${item.title}</span>
+                <button onclick="toggleFav(${item.id})">${fav?"❤️":"🤍"}</button>
             </div>
-        </section>
+        </div>`;
+    });
+}
 
-        <section class="mb-10">
-            <h3 class="text-lg font-bold mb-4 text-zinc-400">PELÍCULAS POPULARES</h3>
-            <div id="movies-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                </div>
-        </section>
+// GENEROS
+function renderGenres(genres){
+    const container = document.getElementById("genres");
 
-        <section>
-            <h3 class="text-lg font-bold mb-4 text-zinc-400">SERIES TENDENCIA</h3>
-            <div id="series-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                </div>
-        </section>
+    genres.forEach(g=>{
+        container.innerHTML += `
+        <button onclick="filterGenre(${g.id})" class="bg-zinc-800 px-3 py-1 rounded text-sm">
+        ${g.name}
+        </button>`;
+    });
+}
 
-    </main>
+// FILTRAR
+async function filterGenre(id){
+    const res = await fetch(`${API}/discover/movie?api_key=${KEY}&with_genres=${id}`);
+    const data = await res.json();
+    renderGrid(data.results);
+}
 
-    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
-    <script>
-        const API_KEY = "8f192518e25d4e0e285fcfc76541b58";
-        const IMG_PATH = "https://image.tmdb.org/t/p/w500";
+// BUSCAR
+document.getElementById("search").addEventListener("input", async e=>{
+    const q = e.target.value;
+    if(q.length<3) return init();
 
-        async function initApp() {
-            const movies = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=es-MX`).then(r => r.json());
-            const series = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${API_KEY}&language=es-MX`).then(r => r.json());
+    const res = await fetch(`${API}/search/movie?api_key=${KEY}&query=${q}`);
+    const data = await res.json();
+    renderGrid(data.results);
+});
 
-            // Llenar Carrusel
-            const carousel = document.getElementById('carousel-list');
-            movies.results.slice(0, 6).forEach(item => {
-                carousel.innerHTML += `
-                    <li class="splide__slide p-2">
-                        <div class="movie-card" onclick="play('movie', '${item.id}')">
-                            <img src="${IMG_PATH}${item.backdrop_path}" class="rounded-xl border border-zinc-800">
-                            <p class="mt-2 text-xs font-bold text-center">${item.title}</p>
-                        </div>
-                    </li>`;
-            });
+// PLAYER
+function play(type,id){
+    document.getElementById("modal").style.display="flex";
+    document.getElementById("player").src=`https://vidsrc.to/embed/${type}/${id}`;
 
-            new Splide('#hero-carousel', { type: 'loop', perPage: 3, gap: '10px', arrows: false, autoplay: true, breakpoints: { 640: { perPage: 1 } } }).mount();
+    if(!continueWatching.includes(id)){
+        continueWatching.push(id);
+        localStorage.setItem("cont", JSON.stringify(continueWatching));
+    }
 
-            // Llenar Grids
-            renderGrid(movies.results, 'movies-grid', 'movie');
-            renderGrid(series.results, 'series-grid', 'tv');
+    renderContinue();
+}
 
-            // Buscador funcional
-            document.getElementById('user-search').addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase();
-                document.querySelectorAll('.movie-card').forEach(card => {
-                    const title = card.getAttribute('data-title').toLowerCase();
-                    card.parentElement.style.display = title.includes(query) ? 'block' : 'none';
-                });
-            });
-        }
+function closePlayer(){
+    document.getElementById("modal").style.display="none";
+    document.getElementById("player").src="";
+}
 
-        function renderGrid(data, containerId, type) {
-            const container = document.getElementById(containerId);
-            data.forEach(item => {
-                const title = item.title || item.name;
-                container.innerHTML += `
-                    <div class="movie-card" data-title="${title}" onclick="play('${type}', '${item.id}')">
-                        <img src="${IMG_PATH}${item.poster_path}" class="rounded-lg shadow-md border border-zinc-900">
-                        <p class="mt-2 text-[10px] text-zinc-500 truncate">${title}</p>
-                    </div>`;
-            });
-        }
+// FAVORITOS
+function toggleFav(id){
+    if(favorites.includes(id)){
+        favorites = favorites.filter(f=>f!==id);
+    } else {
+        favorites.push(id);
+    }
+    localStorage.setItem("fav", JSON.stringify(favorites));
+    init();
+}
 
-        function play(type, id) {
-            const player = document.getElementById('player-section');
-            const iframe = document.getElementById('main-iframe');
-            player.style.display = 'block';
-            iframe.src = `https://vidsrc.to/embed/${type}/${id}`;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+function showFavorites(){
+    filterCustom(favorites);
+}
 
-        initApp();
-    </script>
+// CONTINUAR
+async function renderContinue(){
+    const container = document.getElementById("continue");
+    container.innerHTML="";
+
+    for(let id of continueWatching.slice(-10)){
+        const res = await fetch(`${API}/movie/${id}?api_key=${KEY}`);
+        const m = await res.json();
+
+        container.innerHTML += `
+        <img onclick="play('movie',${id})"
+        src="${IMG+m.poster_path}"
+        class="w-32 rounded cursor-pointer">`;
+    }
+}
+
+// FILTRO CUSTOM
+async function filterCustom(ids){
+    const results=[];
+    for(let id of ids){
+        const res = await fetch(`${API}/movie/${id}?api_key=${KEY}`);
+        results.push(await res.json());
+    }
+    renderGrid(results);
+}
+
+// SKELETON
+function showSkeleton(){
+    const grid = document.getElementById("grid");
+    for(let i=0;i<12;i++){
+        grid.innerHTML += `<div class="h-40 skeleton rounded"></div>`;
+    }
+}
+
+init();
+</script>
+
 </body>
 </html>
