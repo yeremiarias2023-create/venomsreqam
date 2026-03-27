@@ -3,78 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VENOMSTREAM TITAN</title>
+    <title>VENOMSTREAM - El Multiverso de Series y Películas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css">
     <style>
-        body { background-color: #000; color: white; font-family: sans-serif; }
-        .iframe-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; border: 2px solid #333; }
-        .iframe-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-        .splide__slide { transition: transform 0.3s; cursor: pointer; }
-        .splide__slide:hover { transform: scale(1.1); z-index: 10; }
-        .app-card { background: #111; border: 1px solid #222; border-radius: 15px; padding: 20px; transition: 0.3s; cursor: pointer; }
-        .app-card:hover { border-color: red; background: #1a0000; }
+        body { background-color: #141414; color: white; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        .netflix-card { transition: transform 0.3s ease; cursor: pointer; position: relative; }
+        .netflix-card:hover { transform: scale(1.1); z-index: 20; }
+        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; border-radius: 4px; overflow: hidden; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .ad-space { background: #222; border: 1px dashed #444; text-align: center; padding: 10px; color: #888; font-size: 12px; margin: 20px 0; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #141414; }
+        ::-webkit-scrollbar-thumb { background: #e50914; border-radius: 10px; }
     </style>
 </head>
-<body class="p-0 m-0">
+<body>
 
-    <nav class="p-5 border-b border-zinc-800 flex justify-between items-center bg-black/90 sticky top-0 z-50">
-        <h1 class="text-2xl font-black text-red-600 tracking-tighter">VENOMSTREAM <span class="text-white text-xs font-light">TITAN OS</span></h1>
-        <div class="text-xs font-bold bg-zinc-900 px-3 py-1 rounded-full border border-zinc-700 text-zinc-400">SISTEMA EN LÍNEA ✔</div>
-    </nav>
+    <header class="fixed top-0 w-full z-50 bg-gradient-to-b from-black to-transparent p-5 flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-red-600 tracking-tighter">VENOMSTREAM</h1>
+        <nav class="hidden md:flex gap-6 text-sm font-light">
+            <a href="#" class="hover:text-zinc-400">Inicio</a>
+            <a href="#" class="hover:text-zinc-400">Series</a>
+            <a href="#" class="hover:text-zinc-400">Películas</a>
+            <a href="#" class="hover:text-zinc-400">Novedades populares</a>
+        </nav>
+    </header>
 
-    <main class="max-w-6xl mx-auto p-4 space-y-12">
-        
-        <section class="mt-6">
-            <div class="iframe-container shadow-2xl shadow-red-900/20">
-                <iframe id="reproductor" src="https://autoembed.to/movie/tmdb/933260?server=1" allowfullscreen></iframe>
+    <section class="relative h-[80vh] w-full flex items-center px-10 bg-cover bg-center" style="background-image: linear-gradient(to right, #141414, transparent), url('https://image.tmdb.org/t/p/original/or06b45Y8pUvR68b49Y6u574I.jpg');">
+        <div class="max-w-2xl space-y-4">
+            <h2 id="hero-title" class="text-6xl font-black italic">AVATAR 3</h2>
+            <p class="text-lg text-zinc-300">Explora las profundidades de Pandora en esta nueva entrega épica. Disponible ahora en Audio Latino Forzado.</p>
+            <div class="flex gap-3">
+                <button onclick="window.scrollTo({top: 600, behavior: 'smooth'})" class="bg-white text-black px-8 py-2 rounded font-bold flex items-center gap-2 hover:bg-white/80">▶ Reproducir</button>
+                <button class="bg-zinc-500/50 text-white px-8 py-2 rounded font-bold hover:bg-zinc-500/30">ⓘ Más información</button>
             </div>
-            <div class="mt-4 flex justify-between items-center">
-                <h2 id="titulo-video" class="text-xl font-bold text-red-500">REPRODUCIENDO: AVATAR 3 (ESTRENO)</h2>
-                <span class="text-xs text-zinc-500 italic">Audio Latino Forzado 2026</span>
+        </div>
+    </section>
+
+    <main class="px-4 md:px-10 -mt-32 relative z-10 pb-20">
+        
+        <div class="ad-space">ESPACIO PARA PUBLICIDAD (BANNER 728x90)</div>
+
+        <section id="player-section" class="mb-10">
+            <h3 class="text-xl font-bold mb-4 text-red-600 uppercase tracking-tighter">Estás viendo ahora:</h3>
+            <div class="video-container shadow-2xl">
+                <iframe id="main-video" src="https://autoembed.to/movie/tmdb/933260?server=1" allowfullscreen></iframe>
             </div>
         </section>
 
-        <section>
-            <h3 class="text-lg font-bold mb-4 text-zinc-400 uppercase tracking-widest">Carrusel de Estrenos 2026</h3>
-            <div id="main-carousel" class="splide">
+        <section class="mb-10">
+            <h3 class="text-xl font-bold mb-4">Estrenos 2026</h3>
+            <div id="row-estrenos" class="splide">
                 <div class="splide__track">
                     <ul class="splide__list">
-                        <li class="splide__list" onclick="playVideo('933260', 'AVATAR 3')">
-                            <img src="https://image.tmdb.org/t/p/w500/or06b45Y8pUvR68b49Y6u574I.jpg" class="rounded-lg">
+                        <li class="splide__slide netflix-card" onclick="changeContent('933260', 'AVATAR 3')">
+                            <img src="https://image.tmdb.org/t/p/w500/or06b45Y8pUvR68b49Y6u574I.jpg" class="rounded">
                         </li>
-                        <li class="splide__list" onclick="playVideo('1022789', 'INSIDE OUT 2')">
-                            <img src="https://image.tmdb.org/t/p/w500/g4bXuVHN4Fv7vSdfSskD90wBdf7.jpg" class="rounded-lg">
+                        <li class="splide__slide netflix-card" onclick="changeContent('1022789', 'INSIDE OUT 2')">
+                            <img src="https://image.tmdb.org/t/p/w500/g4bXuVHN4Fv7vSdfSskD90wBdf7.jpg" class="rounded">
                         </li>
-                        <li class="splide__list" onclick="playVideo('823464', 'GODZILLA X KONG')">
-                            <img src="https://image.tmdb.org/t/p/w500/AOmYAbYn2yU2EwI909yO85iW1z.jpg" class="rounded-lg">
+                        <li class="splide__slide netflix-card" onclick="changeContent('823464', 'GODZILLA X KONG')">
+                            <img src="https://image.tmdb.org/t/p/w500/AOmYAbYn2yU2EwI909yO85iW1z.jpg" class="rounded">
                         </li>
-                        <li class="splide__list" onclick="playVideo('615656', 'MEG 2: THE TRENCH')">
-                            <img src="https://image.tmdb.org/t/p/w500/wP54b23275cbaFkY6b4467554983.jpg" class="rounded-lg">
+                        <li class="splide__slide netflix-card" onclick="changeContent('615656', 'MEG 2')">
+                            <img src="https://image.tmdb.org/t/p/w500/wP54b23275cbaFkY6b4467554983.jpg" class="rounded">
+                        </li>
+                        <li class="splide__slide netflix-card" onclick="changeContent('762441', 'A QUIET PLACE: DAY ONE')">
+                            <img src="https://image.tmdb.org/t/p/w500/yrpkh37SIVscFlBR3n9C9S9oYv5.jpg" class="rounded">
                         </li>
                     </ul>
                 </div>
             </div>
         </section>
 
-        <section>
-            <h3 class="text-lg font-bold mb-6 text-zinc-400 uppercase tracking-widest">El Multiverso de Apps</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="app-card text-center">
-                    <img src="https://logodownload.org/wp-content/uploads/2014/10/netflix-logo-5.png" class="h-10 mx-auto mb-2 object-contain">
-                    <p class="text-sm font-bold">NETFLIX</p>
-                </div>
-                <div class="app-card text-center">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Disney%2B_logo.svg/2560px-Disney%2B_logo.svg.png" class="h-10 mx-auto mb-2 object-contain">
-                    <p class="text-sm font-bold">DISNEY+</p>
-                </div>
-                <div class="app-card text-center">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Hbo-max-logo.png/1200px-Hbo-max-logo.png" class="h-10 mx-auto mb-2 object-contain">
-                    <p class="text-sm font-bold">HBO MAX</p>
-                </div>
-                <div class="app-card text-center" onclick="alert('Iniciando sincronización VIP...')">
-                    <div class="h-10 flex items-center justify-center font-black text-red-600">TITAN VIP</div>
-                    <p class="text-sm font-bold">PREMIUM</p>
+        <div class="ad-space">PUBLICIDAD ENTRE FILAS (BANNER NATIVO)</div>
+
+        <section class="mb-10">
+            <h3 class="text-xl font-bold mb-4">Tendencias de Series</h3>
+            <div id="row-series" class="splide">
+                <div class="splide__track">
+                    <ul class="splide__list">
+                        <li class="splide__slide netflix-card" onclick="changeSeries('60625', 'RICK AND MORTY')">
+                            <img src="https://image.tmdb.org/t/p/w500/gd9id7CihpZp9f3hC02fCAnfL3S.jpg" class="rounded">
+                        </li>
+                        <li class="splide__slide netflix-card" onclick="changeSeries('1396', 'BREAKING BAD')">
+                            <img src="https://image.tmdb.org/t/p/w500/ggFHnq98FeY0NznCsq9T3Z9HGIs.jpg" class="rounded">
+                        </li>
+                        <li class="splide__slide netflix-card" onclick="changeSeries('113962', 'LOKI')">
+                            <img src="https://image.tmdb.org/t/p/w500/oJdV02mXpS4vI87p0S3I88Z09vS.jpg" class="rounded">
+                        </li>
+                        <li class="splide__slide netflix-card" onclick="changeSeries('94605', 'ARCANO')">
+                            <img src="https://image.tmdb.org/t/p/w500/abT96mwa6uW6Gf7A6U9pB08ZpZz.jpg" class="rounded">
+                        </li>
+                    </ul>
                 </div>
             </div>
         </section>
@@ -84,26 +106,29 @@
     <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            new Splide('#main-carousel', {
-                type: 'loop',
-                perPage: 3,
-                gap: '20px',
-                arrows: false,
-                pagination: true,
-                autoplay: true,
-                breakpoints: { 640: { perPage: 1 } }
-            }).mount();
+            // Inicializar filas de carrusel
+            const splideConfig = {
+                type: 'slide',
+                perPage: 5,
+                gap: '10px',
+                pagination: false,
+                arrows: true,
+                breakpoints: { 640: { perPage: 2 }, 1024: { perPage: 4 } }
+            };
+            new Splide('#row-estrenos', splideConfig).mount();
+            new Splide('#row-series', splideConfig).mount();
         });
 
-        function playVideo(id, titulo) {
-            const player = document.getElementById('reproductor');
-            const titleElement = document.getElementById('titulo-video');
-            
-            // Nuevo servidor más estable
-            player.src = `https://autoembed.to/movie/tmdb/${id}?server=1`;
-            titleElement.innerText = `REPRODUCIENDO: ${titulo}`;
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        function changeContent(id, titulo) {
+            document.getElementById('main-video').src = `https://autoembed.to/movie/tmdb/${id}?server=1`;
+            document.getElementById('hero-title').innerText = titulo;
+            window.scrollTo({ top: 600, behavior: 'smooth' });
+        }
+
+        function changeSeries(id, titulo) {
+            document.getElementById('main-video').src = `https://autoembed.to/tv/tmdb/${id}/1/1?server=1`;
+            document.getElementById('hero-title').innerText = titulo;
+            window.scrollTo({ top: 600, behavior: 'smooth' });
         }
     </script>
 </body>
