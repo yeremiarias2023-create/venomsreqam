@@ -3,36 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>NexusFlix | Portal de Películas y Series</title>
-    <!-- Tailwind + Fuentes + Iconos -->
+    <title>NexusFlix | Catálogo Ultra HD</title>
+    <!-- Tailwind + Font Awesome + Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,500;14..32,700;14..32,900&display=swap" rel="stylesheet">
-    <!-- Swiper CSS/JS (carrusel táctil y con flechas) -->
+    <!-- Swiper CSS/JS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <style>
         * { font-family: 'Inter', sans-serif; }
-        body { background-color: #030712; scroll-behavior: smooth; }
-        /* Scroll personalizado */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #111827; }
+        body { background: #020617; scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
-        .carousel-title { font-weight: 800; letter-spacing: -0.3px; border-left: 4px solid #10b981; padding-left: 1rem; margin-bottom: 1.2rem; margin-top: 1rem; }
+        .carousel-title {
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            border-left: 4px solid #10b981;
+            padding-left: 1rem;
+            margin-bottom: 1.2rem;
+            margin-top: 1rem;
+        }
         .movie-card {
             transition: transform 0.25s ease, box-shadow 0.2s;
             border-radius: 1rem;
             overflow: hidden;
-            background: #111827;
+            background: #0f172a;
             cursor: pointer;
+            border: 1px solid #1e293b;
         }
         .movie-card:hover {
             transform: scale(1.03);
-            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.7), 0 0 0 2px #10b981;
+            box-shadow: 0 20px 25px -12px rgba(0,0,0,0.8), 0 0 0 2px #10b981;
         }
         .swiper-button-next, .swiper-button-prev {
             color: #10b981 !important;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -47,13 +54,11 @@
             font-size: 0.75rem;
             padding: 0.2rem 0.6rem;
             border-radius: 30px;
-            color: #facc15;
         }
-        /* Modal overlay */
         .modal-backdrop {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.92);
             backdrop-filter: blur(10px);
             z-index: 1000;
             display: flex;
@@ -74,18 +79,13 @@
             background: #0f172a;
             border-radius: 2rem;
             overflow-y: auto;
-            border: 1px solid #1e293b;
+            border: 1px solid #334155;
             box-shadow: 0 25px 40px rgba(0,0,0,0.8);
         }
-        /* Loader skeleton */
-        .loader-skeleton {
-            background: linear-gradient(90deg, #1f2937 25%, #2d3a4a 50%, #1f2937 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.2s infinite;
-        }
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+        .embed-container {
+            background: #000;
+            border-radius: 1rem;
+            overflow: hidden;
         }
         iframe {
             width: 100%;
@@ -94,24 +94,36 @@
             border: none;
             border-radius: 1rem;
         }
-        .embed-container {
-            background: #000;
-            border-radius: 1rem;
-            overflow: hidden;
+        .server-btn {
+            transition: all 0.2s;
+        }
+        .server-btn.active {
+            background-color: #10b981;
+            color: black;
+            border-color: #10b981;
+        }
+        .loader-skeleton {
+            background: linear-gradient(90deg, #1e293b 25%, #2d3a4a 50%, #1e293b 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
 </head>
-<body class="text-gray-200 antialiased">
+<body class="text-gray-200">
 
-    <!-- Header con logo y búsqueda -->
+    <!-- Header -->
     <header class="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-emerald-900/40 shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-2">
-                <i class="fa-brands fa-symfony text-3xl text-emerald-400"></i>
+                <i class="fa-solid fa-clapperboard text-3xl text-emerald-400"></i>
                 <h1 class="text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Nexus<span class="text-white">Flix</span></h1>
             </div>
             <div class="flex flex-1 max-w-lg w-full md:w-auto relative">
-                <input type="text" id="searchInput" placeholder="Buscar películas o series... (título, actor)" class="w-full bg-gray-900/80 border border-gray-700 rounded-full py-3 pl-12 pr-4 text-white placeholder:text-gray-400 focus:outline-none focus:border-emerald-500 transition">
+                <input type="text" id="searchInput" placeholder="Buscar películas, series, actores..." class="w-full bg-gray-900/80 border border-gray-700 rounded-full py-3 pl-12 pr-4 text-white placeholder:text-gray-400 focus:outline-none focus:border-emerald-500 transition">
                 <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 <button id="searchBtn" class="ml-2 bg-emerald-600 hover:bg-emerald-500 transition px-5 rounded-full font-bold">Buscar</button>
                 <button id="clearSearchBtn" class="ml-2 bg-gray-800 hover:bg-gray-700 transition px-4 rounded-full text-sm hidden">✕ Limpiar</button>
@@ -120,26 +132,26 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <!-- Sección de resultados de búsqueda (oculta por defecto) -->
+        <!-- Sección resultados búsqueda (oculta por defecto) -->
         <div id="searchResultsSection" class="hidden mb-12">
             <div class="flex justify-between items-center border-b border-gray-800 pb-3 mb-6">
-                <h2 class="text-2xl font-black flex items-center gap-2"><i class="fa-solid fa-magnifying-glass text-emerald-400"></i> Resultados de búsqueda</h2>
+                <h2 class="text-2xl font-black flex items-center gap-2"><i class="fa-solid fa-magnifying-glass text-emerald-400"></i> Resultados</h2>
                 <button id="closeSearchBtn" class="bg-gray-800 px-5 py-2 rounded-full text-sm hover:bg-gray-700 transition">← Volver al inicio</button>
             </div>
             <div id="searchGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5"></div>
         </div>
 
-        <!-- Contenedor de carruseles dinámicos (home) -->
+        <!-- Contenedor principal de carruseles -->
         <div id="homeContainer"></div>
 
-        <!-- Loading general -->
+        <!-- Loader global -->
         <div id="globalLoader" class="flex justify-center items-center py-20 flex-col gap-4">
             <div class="w-14 h-14 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
             <p class="text-gray-400 font-medium">Cargando catálogo estelar...</p>
         </div>
     </main>
 
-    <!-- MODAL DE DETALLES (info + trailer + botón ver ahora) -->
+    <!-- MODAL DETALLES -->
     <div id="detailModal" class="modal-backdrop">
         <div class="modal-container p-5 md:p-6">
             <div class="flex justify-between items-start mb-4">
@@ -165,17 +177,21 @@
         </div>
     </div>
 
-    <!-- MODAL EMBED REPRODUCTOR (streaming) -->
+    <!-- MODAL REPRODUCTOR CON SELECTOR DE SERVIDORES -->
     <div id="playerModal" class="modal-backdrop">
         <div class="modal-container p-4 w-[95%] max-w-5xl">
-            <div class="flex justify-between items-center pb-3">
-                <h3 class="font-bold text-xl text-emerald-400"><i class="fas fa-tv mr-2"></i> Reproduciendo</h3>
+            <div class="flex justify-between items-center pb-3 flex-wrap gap-2">
+                <h3 class="font-bold text-xl text-emerald-400"><i class="fas fa-tv mr-2"></i> <span id="playerTitle">Reproduciendo</span></h3>
+                <div class="flex gap-2">
+                    <button id="server1Btn" class="server-btn bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-xs font-bold transition">Servidor 1</button>
+                    <button id="server2Btn" class="server-btn bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-xs font-bold transition">Servidor 2</button>
+                </div>
                 <button id="closePlayerBtn" class="text-white text-2xl bg-gray-800 w-8 h-8 rounded-full hover:bg-red-600 transition">&times;</button>
             </div>
             <div class="embed-container bg-black rounded-xl" style="min-height: 450px;">
                 <iframe id="playerIframe" src="" allowfullscreen allow="autoplay; encrypted-media" class="w-full h-[60vh] md:h-[70vh]"></iframe>
             </div>
-            <p class="text-center text-xs text-gray-400 mt-3">Fuente externa • Calidad HD • Si no carga, prueba recargar el modal</p>
+            <p class="text-center text-xs text-gray-400 mt-3">Cambia de servidor si el video no carga • Calidad HD</p>
         </div>
     </div>
 
@@ -184,13 +200,12 @@
     </footer>
 
     <script>
-        // -------------------- CONFIGURACIÓN TMDB --------------------
-        const API_KEY = '8620242a9b3a1a97d91f253676906238';   // key demo (reemplázala si es necesario)
+        // ================= CONFIGURACIÓN =================
+        const API_KEY = 'b6f588916e25d4e0e285fcfc76541b58';   // TU NUEVA API KEY
         const BASE_IMG = 'https://image.tmdb.org/t/p/w500';
-        const BACKDROP_IMG = 'https://image.tmdb.org/t/p/original';
         const LANGUAGE = 'es-MX';
 
-        // Referencias DOM
+        // DOM elements
         const homeContainer = document.getElementById('homeContainer');
         const globalLoader = document.getElementById('globalLoader');
         const searchSection = document.getElementById('searchResultsSection');
@@ -208,13 +223,16 @@
         const watchNowBtn = document.getElementById('watchNowBtn');
         const trailerBtn = document.getElementById('trailerBtn');
         const trailerFrameDiv = document.getElementById('trailerFrame');
+        const playerIframe = document.getElementById('playerIframe');
+        const playerTitleSpan = document.getElementById('playerTitle');
+        const server1Btn = document.getElementById('server1Btn');
+        const server2Btn = document.getElementById('server2Btn');
 
-        // Variables de estado para el contenido actual en modal
         let currentMediaId = null;
-        let currentMediaType = 'movie'; // 'movie' o 'tv'
+        let currentMediaType = 'movie';
         let currentTitle = '';
 
-        // -------------------- UTILS --------------------
+        // Helper para mostrar/ocultar loader
         function showLoader(show) {
             if(show) globalLoader.classList.remove('hidden');
             else globalLoader.classList.add('hidden');
@@ -231,29 +249,32 @@
         closeModalBtn.onclick = closeAllModals;
         closePlayerBtn.onclick = () => {
             playerModal.classList.remove('active');
-            document.getElementById('playerIframe').src = '';
+            playerIframe.src = '';
         };
         detailModal.onclick = (e) => { if(e.target === detailModal) closeAllModals(); };
         playerModal.onclick = (e) => { if(e.target === playerModal) closeAllModals(); };
 
-        // Obtener detalles completos (para trailer y más)
+        // Obtener detalles (incluye videos para trailer)
         async function fetchDetails(id, type) {
             const endpoint = `https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&language=${LANGUAGE}&append_to_response=videos`;
             try {
                 const res = await fetch(endpoint);
-                if(!res.ok) throw new Error('detalles fail');
+                if(!res.ok) throw new Error('Detalles no disponibles');
                 return await res.json();
             } catch(e) { console.error(e); return null; }
         }
 
-        // Abrir modal de detalles (al hacer click en tarjeta)
+        // Abrir modal de detalles
         async function openDetailModal(item) {
             const mediaId = item.id;
             const mediaType = item.media_type || (item.title ? 'movie' : 'tv');
             currentMediaId = mediaId;
             currentMediaType = mediaType;
             const details = await fetchDetails(mediaId, mediaType);
-            if(!details) return;
+            if(!details) {
+                alert('No se pudieron cargar los detalles');
+                return;
+            }
             currentTitle = details.title || details.name;
             document.getElementById('modalTitle').innerText = currentTitle;
             const posterPath = details.poster_path ? BASE_IMG + details.poster_path : 'https://via.placeholder.com/300x450?text=Sin+imagen';
@@ -266,14 +287,13 @@
             document.getElementById('modalYear').innerText = releaseYear;
             document.getElementById('modalType').innerText = mediaType === 'movie' ? 'Película' : 'Serie';
             document.getElementById('modalOverview').innerText = details.overview || 'Sin sinopsis disponible.';
-            // Limpiar trailer previo
+            // Limpiar trailer
             trailerFrameDiv.classList.add('hidden');
             trailerFrameDiv.innerHTML = '';
-            // Guardar info para el botón "Ver ahora"
             detailModal.classList.add('active');
         }
 
-        // Botón ver trailer
+        // Trailer
         trailerBtn.onclick = async () => {
             if(!currentMediaId) return;
             const details = await fetchDetails(currentMediaId, currentMediaType);
@@ -289,46 +309,69 @@
             }
         };
 
-        // Ver ahora: abre reproductor con embeds (funciona con múltiples fuentes)
+        // Reproductor con servidores
+        let currentServer = 1;
+        function setServer(serverNum) {
+            currentServer = serverNum;
+            if(serverNum === 1) {
+                server1Btn.classList.add('active', 'bg-emerald-500', 'text-black');
+                server2Btn.classList.remove('active', 'bg-emerald-500', 'text-black');
+                server2Btn.classList.add('bg-gray-800');
+            } else {
+                server2Btn.classList.add('active', 'bg-emerald-500', 'text-black');
+                server1Btn.classList.remove('active', 'bg-emerald-500', 'text-black');
+                server1Btn.classList.add('bg-gray-800');
+            }
+            if(playerModal.classList.contains('active')) {
+                loadEmbed();
+            }
+        }
+        function loadEmbed() {
+            if(!currentMediaId || !currentMediaType) return;
+            let embedUrl = '';
+            if(currentServer === 1) {
+                if(currentMediaType === 'movie') {
+                    embedUrl = `https://vidsrc.pro/embed/movie/${currentMediaId}`;
+                } else {
+                    embedUrl = `https://vidsrc.pro/embed/tv/${currentMediaId}/1/1`; // primer capítulo
+                }
+            } else {
+                // Servidor 2: superembed (confiable)
+                if(currentMediaType === 'movie') {
+                    embedUrl = `https://superembed.me/movie/${currentMediaId}`;
+                } else {
+                    embedUrl = `https://superembed.me/tv/${currentMediaId}/1/1`;
+                }
+            }
+            playerIframe.src = embedUrl;
+        }
         watchNowBtn.onclick = () => {
             if(!currentMediaId || !currentMediaType) return;
-            openEmbedPlayer(currentMediaId, currentMediaType, currentTitle);
-        };
-
-        function openEmbedPlayer(id, type, title) {
-            const iframe = document.getElementById('playerIframe');
-            // Usamos múltiples fuentes confiables: vidsrc.pro y vidsrc.cc (alternativa)
-            // Para series: se adapta igual
-            let embedUrl = '';
-            // Preferimos vidsrc.pro que funciona en la mayoría de navegadores
-            if(type === 'movie') {
-                embedUrl = `https://vidsrc.pro/embed/movie/${id}`;
-            } else {
-                embedUrl = `https://vidsrc.pro/embed/tv/${id}/1/1`; // temp primera temporada primer capítulo
-            }
-            // Fallback: si la primera no carga, el usuario puede recargar pero dejamos un backup interno
-            iframe.src = embedUrl;
+            playerTitleSpan.innerText = currentTitle;
             playerModal.classList.add('active');
-            iframe.onerror = () => { console.warn('error iframe'); };
-        }
+            loadEmbed();
+        };
+        server1Btn.onclick = () => { setServer(1); };
+        server2Btn.onclick = () => { setServer(2); };
 
-        // -------------------- GENERAR CARRUSELES (SWIPER) --------------------
-        async function fetchCategory(endpoint, label, categoryKey) {
+        // ================= CARRUSELES =================
+        async function fetchCategory(endpoint, label, key) {
             const url = `https://api.themoviedb.org/3/${endpoint}?api_key=${API_KEY}&language=${LANGUAGE}&page=1`;
             const res = await fetch(url);
+            if(!res.ok) throw new Error(`Error en ${endpoint}`);
             const data = await res.json();
-            return { results: data.results.slice(0, 16), label, categoryKey };
+            return { results: data.results.slice(0, 16), label, key };
         }
 
         function renderCarousel(categoryData) {
-            const { results, label, categoryKey } = categoryData;
+            const { results, label, key } = categoryData;
             if(!results || results.length === 0) return '';
-            const swiperId = `swiper-${categoryKey}`;
+            const swiperId = `swiper-${key}`;
             return `
                 <div class="mb-12">
                     <h2 class="carousel-title text-xl md:text-2xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-film text-emerald-400"></i> ${label}</h2>
                     <div class="swiper ${swiperId} relative">
-                        <div class="swiper-wrapper" id="wrapper-${categoryKey}">
+                        <div class="swiper-wrapper" id="wrapper-${key}">
                             ${results.map(item => {
                                 const mediaType = item.media_type || (item.title ? 'movie' : 'tv');
                                 const titleText = item.title || item.name || 'Sin título';
@@ -358,30 +401,32 @@
             `;
         }
 
-        // Inicializar todos los Swipers después de inyectar HTML
         let swiperInstances = [];
         function initAllSwipers() {
             swiperInstances.forEach(sw => sw.destroy(true, true));
             swiperInstances = [];
             document.querySelectorAll('[class^="swiper-"]').forEach(container => {
                 if(container.classList.contains('swiper')) {
-                    const swiperEl = container;
-                    const swiper = new Swiper(swiperEl, {
+                    const swiper = new Swiper(container, {
                         slidesPerView: 'auto',
                         spaceBetween: 16,
                         navigation: {
-                            nextEl: swiperEl.querySelector('.swiper-button-next'),
-                            prevEl: swiperEl.querySelector('.swiper-button-prev'),
+                            nextEl: container.querySelector('.swiper-button-next'),
+                            prevEl: container.querySelector('.swiper-button-prev'),
                         },
-                        pagination: { el: swiperEl.querySelector('.swiper-pagination'), clickable: true, dynamicBullets: true },
-                        breakpoints: { 320: { slidesPerView: 2.2 }, 640: { slidesPerView: 3.2 }, 1024: { slidesPerView: 4.5 }, 1280: { slidesPerView: 5.5 } }
+                        pagination: { el: container.querySelector('.swiper-pagination'), clickable: true, dynamicBullets: true },
+                        breakpoints: {
+                            320: { slidesPerView: 2.2 },
+                            640: { slidesPerView: 3.2 },
+                            1024: { slidesPerView: 4.5 },
+                            1280: { slidesPerView: 5.5 }
+                        }
                     });
                     swiperInstances.push(swiper);
                 }
             });
         }
 
-        // Evento delegado para clicks en tarjetas
         function bindCardEvents() {
             document.querySelectorAll('.movie-card').forEach(card => {
                 card.removeEventListener('click', card._listener);
@@ -391,23 +436,23 @@
                     const type = card.dataset.type;
                     const title = card.dataset.title;
                     if(!id) return;
-                    await openDetailModal({ id, media_type: type, title: title });
+                    await openDetailModal({ id, media_type: type, title });
                 };
                 card.addEventListener('click', listener);
                 card._listener = listener;
             });
         }
 
-        // Cargar todas las categorías y renderizar home
         async function loadHome() {
             showLoader(true);
             try {
                 const categories = [
-                    { endpoint: 'trending/all/day', label: '🔥 Tendencias del día', key: 'trending' },
-                    { endpoint: 'movie/popular', label: '🎬 Películas Populares', key: 'movies_pop' },
-                    { endpoint: 'movie/top_rated', label: '⭐ Películas Mejor Calificadas', key: 'top_movies' },
-                    { endpoint: 'tv/popular', label: '📺 Series Populares', key: 'tv_pop' },
-                    { endpoint: 'tv/top_rated', label: '🏆 Series Mejor Valoradas', key: 'top_tv' },
+                    { endpoint: 'trending/all/day', label: '🔥 Tendencias del día', key: 'trend' },
+                    { endpoint: 'movie/popular', label: '🎬 Películas Populares', key: 'movies' },
+                    { endpoint: 'movie/top_rated', label: '⭐ Mejor calificadas (cine)', key: 'topmovies' },
+                    { endpoint: 'tv/popular', label: '📺 Series Populares', key: 'tv' },
+                    { endpoint: 'tv/top_rated', label: '🏆 Series Mejor valoradas', key: 'toptv' },
+                    { endpoint: 'movie/now_playing', label: '🍿 En cartelera', key: 'now' }
                 ];
                 const fetches = categories.map(cat => fetchCategory(cat.endpoint, cat.label, cat.key));
                 const resultsData = await Promise.all(fetches);
@@ -416,13 +461,13 @@
                 bindCardEvents();
             } catch (error) {
                 console.error(error);
-                homeContainer.innerHTML = `<div class="bg-red-900/40 p-6 rounded-2xl text-center">Error al cargar contenido. Verifica tu conexión o API Key.</div>`;
+                homeContainer.innerHTML = `<div class="bg-red-900/50 p-6 rounded-2xl text-center text-white"><i class="fas fa-exclamation-triangle text-3xl mb-3"></i><br>Error al cargar contenido. Verifica tu conexión o la API Key. Si el problema persiste, espera unos minutos.</div>`;
             } finally {
                 showLoader(false);
             }
         }
 
-        // -------------------- BÚSQUEDA AVANZADA --------------------
+        // ================= BÚSQUEDA =================
         async function performSearch(query) {
             if(!query.trim()) return;
             showLoader(true);
@@ -453,11 +498,10 @@
                         `;
                     }).join('');
                 }
-                // Ocultar home, mostrar sección de búsqueda
                 homeContainer.classList.add('hidden');
                 searchSection.classList.remove('hidden');
                 clearSearchBtn.classList.remove('hidden');
-                // bindear eventos en resultados de búsqueda
+                // Bind eventos en resultados
                 document.querySelectorAll('#searchGrid .movie-card').forEach(card => {
                     card.removeEventListener('click', card._searchListener);
                     const listener = async (e) => {
@@ -481,20 +525,16 @@
             searchSection.classList.add('hidden');
             clearSearchBtn.classList.add('hidden');
             searchInput.value = '';
-            // Opcional: recargar home si por algún motivo está vacío
             if(homeContainer.innerHTML.trim() === '') loadHome();
         }
 
-        // Eventos búsqueda
-        searchBtn.onclick = () => { performSearch(searchInput.value.trim()); };
+        searchBtn.onclick = () => performSearch(searchInput.value.trim());
         searchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') performSearch(searchInput.value.trim()); });
         clearSearchBtn.onclick = resetToHome;
         closeSearchBtn.onclick = resetToHome;
 
-        // Inicializar todo
-        (async () => {
-            await loadHome();
-        })();
+        // Inicializar
+        loadHome();
     </script>
 </body>
 </html>
