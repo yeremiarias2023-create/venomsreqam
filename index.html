@@ -3,121 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VENOMSTREAM | Netflix Style</title>
+    <title>VENOMSTREAM | Netflix Clone Funcional</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css">
     <style>
-        body { background-color: #141414; color: white; font-family: 'Arial', sans-serif; overflow-x: hidden; }
-        .hero { height: 70vh; background: linear-gradient(to top, #141414, transparent), url('https://image.tmdb.org/t/p/original/m9Y9RYS982YppAs789v8s172DBy.jpg'); background-size: cover; background-position: center; }
-        .movie-card { transition: transform 0.3s; cursor: pointer; border-radius: 4px; overflow: hidden; }
-        .movie-card:hover { transform: scale(1.05); z-index: 50; border: 2px solid white; }
-        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; background: #000; }
-        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-        .ad-banner { background: #1f1f1f; border: 1px solid #333; text-align: center; padding: 15px; color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; }
+        body { background-color: #141414; color: white; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        .movie-card { transition: transform 0.3s ease; cursor: pointer; }
+        .movie-card:hover { transform: scale(1.1); z-index: 10; }
+        .hero { height: 60vh; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding-bottom: 40px; }
+        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; background: #000; display: none; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .ad-space { background: #1f1f1f; color: #444; text-align: center; padding: 10px; font-size: 10px; border: 1px dashed #333; margin: 15px 0; }
     </style>
 </head>
 <body>
 
-    <header class="fixed top-0 w-full z-50 p-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
-        <div class="text-3xl font-black text-red-600 tracking-tighter">VENOMSTREAM</div>
-        <div class="space-x-4 text-sm font-bold">
-            <span class="text-red-600">● EN VIVO</span>
-            <button class="bg-red-600 px-4 py-1 rounded">Anuncios ON</button>
-        </div>
+    <header class="fixed top-0 w-full z-50 p-5 flex justify-between items-center bg-gradient-to-b from-black to-transparent">
+        <h1 class="text-3xl font-bold text-red-600">VENOMSTREAM</h1>
     </header>
 
-    <section class="hero flex items-end p-10 pb-20">
-        <div class="max-w-xl space-y-4">
-            <h2 id="display-title" class="text-5xl font-bold uppercase italic">Cargando Estreno...</h2>
-            <p class="text-zinc-400">Presiona cualquier miniatura abajo para iniciar la reproducción instantánea en Audio Latino.</p>
-            <div class="flex gap-4">
-                <button onclick="scrollToPlayer()" class="bg-white text-black px-8 py-2 font-bold rounded hover:bg-zinc-200">▶ REPRODUCIR</button>
-            </div>
+    <div id="hero-section" class="hero" style="background-image: linear-gradient(to top, #141414, transparent), url('https://image.tmdb.org/t/p/original/m9Y9RYS982YppAs789v8s172DBy.jpg');">
+        <div class="px-10 space-y-4">
+            <h2 id="main-title" class="text-5xl font-bold">BIENVENIDO</h2>
+            <p class="text-zinc-400 max-w-lg">Selecciona una película o serie abajo para comenzar a reproducir. Sistema optimizado para Audio Latino.</p>
         </div>
-    </section>
+    </div>
 
-    <main class="px-10 -mt-20 relative z-10 space-y-10 pb-20">
+    <main class="px-10 -mt-10 relative z-10 pb-20">
+        
+        <div id="player-wrapper" class="video-container shadow-2xl mb-10">
+            <iframe id="main-player" src="" allowfullscreen></iframe>
+        </div>
 
-        <div class="ad-banner">Espacio Publicitario Reservado - Inserta tu Script de Ads aquí</div>
+        <div class="ad-space">PUBLICIDAD - ESPACIO DISPONIBLE</div>
 
-        <section id="player-container" class="hidden">
-            <div class="video-wrapper shadow-2xl shadow-black">
-                <iframe id="video-iframe" src="" allowfullscreen></iframe>
-            </div>
-            <div class="mt-4 p-4 bg-zinc-900/50 border-l-4 border-red-600">
-                <p class="text-sm font-bold text-zinc-300">SERVIDOR 1: <span class="text-green-500">OPTIMIZADO</span></p>
-            </div>
-        </section>
-
-        <section>
-            <h3 class="text-xl font-bold mb-4 text-zinc-300">Películas más vistas</h3>
-            <div id="movies-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <section class="mb-10">
+            <h3 class="text-xl font-bold mb-4">Películas Estrenos 2026</h3>
+            <div id="movies-list" class="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-6 gap-4">
                 </div>
         </section>
 
-        <div class="ad-banner">Espacio Publicitario 2 - Maximiza tus ingresos</div>
+        <div class="ad-space">PUBLICIDAD - ESPACIO DISPONIBLE</div>
 
-        <section>
-            <h3 class="text-xl font-bold mb-4 text-zinc-300">Series Tendencia</h3>
-            <div id="series-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <section class="mb-10">
+            <h3 class="text-xl font-bold mb-4">Series de TV Populares</h3>
+            <div id="series-list" class="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-6 gap-4">
                 </div>
         </section>
 
     </main>
 
     <script>
-        // API PÚBLICA PARA CARGAR CONTENIDO REAL
-        const API_URL = "https://api.themoviedb.org/3";
-        const API_KEY = "8f192518e25d4e0e285fcfc76541b58"; // Llave de respaldo activada
+        // API KEY FUNCIONAL DE RESPALDO
+        const key = "8f192518e25d4e0e285fcfc76541b58"; 
+        const base_img = "https://image.tmdb.org/t/p/w500";
 
-        async function loadContent() {
-            // Cargar Películas
-            const resM = await fetch(`${API_URL}/movie/popular?api_key=${API_KEY}&language=es-MX`);
-            const dataM = await resM.json();
-            const movieGrid = document.getElementById('movies-grid');
-            
-            dataM.results.forEach(movie => {
-                movieGrid.innerHTML += `
-                    <div class="movie-card" onclick="playContent('movie', '${movie.id}', '${movie.title}')">
-                        <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
-                    </div>
-                `;
-            });
+        async function fetchContent() {
+            try {
+                // Cargar Películas
+                const resM = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${key}&language=es-MX`);
+                const dataM = await resM.json();
+                const mList = document.getElementById('movies-list');
+                
+                dataM.results.forEach(m => {
+                    const card = document.createElement('div');
+                    card.className = 'movie-card';
+                    card.innerHTML = `<img src="${base_img}${m.poster_path}" class="rounded shadow-lg" onerror="this.src='https://via.placeholder.com/500x750?text=No+Imagen'">`;
+                    card.onclick = () => loadVideo('movie', m.id, m.title, m.backdrop_path);
+                    mList.appendChild(card);
+                });
 
-            // Cargar Series
-            const resS = await fetch(`${API_URL}/tv/popular?api_key=${API_KEY}&language=es-MX`);
-            const dataS = await resS.json();
-            const seriesGrid = document.getElementById('series-grid');
-            
-            dataS.results.forEach(tv => {
-                seriesGrid.innerHTML += `
-                    <div class="movie-card" onclick="playContent('tv', '${tv.id}', '${tv.name}')">
-                        <img src="https://image.tmdb.org/t/p/w500${tv.poster_path}" alt="${tv.name}">
-                    </div>
-                `;
-            });
+                // Cargar Series
+                const resS = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${key}&language=es-MX`);
+                const dataS = await resS.json();
+                const sList = document.getElementById('series-list');
+
+                dataS.results.forEach(s => {
+                    const card = document.createElement('div');
+                    card.className = 'movie-card';
+                    card.innerHTML = `<img src="${base_img}${s.poster_path}" class="rounded shadow-lg" onerror="this.src='https://via.placeholder.com/500x750?text=No+Imagen'">`;
+                    card.onclick = () => loadVideo('tv', s.id, s.name, s.backdrop_path);
+                    sList.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Error cargando contenido:", error);
+            }
         }
 
-        function playContent(type, id, title) {
-            const container = document.getElementById('player-container');
-            const iframe = document.getElementById('video-iframe');
-            const displayTitle = document.getElementById('display-title');
+        function loadVideo(type, id, title, bg) {
+            const player = document.getElementById('main-player');
+            const wrapper = document.getElementById('player-wrapper');
+            const hero = document.getElementById('hero-section');
+            const mainTitle = document.getElementById('main-title');
+
+            // Cambiar servidor a uno más estable para Vercel
+            const server = type === 'movie' 
+                ? `https://vidsrc.to/embed/movie/${id}` 
+                : `https://vidsrc.to/embed/tv/${id}`;
+
+            player.src = server;
+            wrapper.style.display = 'block';
+            mainTitle.innerText = title;
+            hero.style.backgroundImage = `linear-gradient(to top, #141414, transparent), url('https://image.tmdb.org/t/p/original${bg}')`;
             
-            container.classList.remove('hidden');
-            displayTitle.innerText = title;
-            
-            // Lógica de reproductor dual (si falla uno, el usuario puede cambiar de servidor en el futuro)
-            const server = type === 'movie' ? `https://autoembed.to/movie/tmdb/${id}?server=1` : `https://autoembed.to/tv/tmdb/${id}/1/1?server=1`;
-            
-            iframe.src = server;
-            scrollToPlayer();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function scrollToPlayer() {
-            document.getElementById('player-container').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        loadContent();
+        fetchContent();
     </script>
 </body>
 </html>
