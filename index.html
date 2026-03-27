@@ -3,72 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venomstream Titan - Multiverso</title>
+    <title>VENOMSTREAM TITAN - Ultra Acceso 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css">
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; overflow-x: hidden; }
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
-        .titan-text { color: #00ffcc; font-size: 2.5rem; letter-spacing: 8px; margin-bottom: 10px; text-shadow: 0 0 15px #00ffcc; }
-        .bar { width: 200px; height: 4px; background: #333; position: relative; }
-        .progress { width: 0%; height: 100%; background: #00ffcc; box-shadow: 0 0 10px #00ffcc; transition: width 0.5s; }
-        #app-content { display: none; padding: 20px; }
-        iframe { width: 100%; height: 500px; border: none; border-radius: 8px; background: #111; }
+        body { background-color: #000; color: white; font-family: 'Inter', sans-serif; margin: 0; }
+        .iframe-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid #222; }
+        .iframe-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .splide__slide img { width: 100%; height: auto; border-radius: 8px; cursor: pointer; transition: transform 0.3s ease; }
+        .splide__slide img:hover { transform: scale(1.05); }
+        .app-card { background: #111; border: 1px solid #222; border-radius: 12px; transition: all 0.3s ease; }
+        .app-card:hover { border-color: #ff0000; transform: translateY(-5px); box-shadow: 0 5px 15px rgba(255,0,0,0.2); }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <div class="titan-text">TITAN OS</div>
-        <div class="bar"><div id="progress" class="progress"></div></div>
-        <p id="status" style="color: #666; margin-top: 15px;">Sincronizando con satélites...</p>
-    </div>
+    <nav class="bg-black/80 backdrop-blur-md sticky top-0 z-50 border-b border-zinc-800 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-3xl font-extrabold tracking-tighter text-red-600">VENOM<span class="text-white font-light">STREAM</span></h1>
+            <div class="flex gap-2">
+                <span class="bg-red-600 text-xs text-white font-bold px-3 py-1 rounded-full">VIP</span>
+                <span class="bg-zinc-800 text-xs text-zinc-400 font-bold px-3 py-1 rounded-full">ESTRENOS 2026</span>
+            </div>
+        </div>
+    </nav>
 
-    <div id="app-content">
-        <header style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px;">
-            <h1 style="color: red; margin: 0;">VENOMSTREAM <span style="color: #fff; font-size: 0.5em;">VIP ACCESS</span></h1>
-            <nav>
-                <button onclick="location.reload()" style="background: transparent; color: #fff; border: 1px solid #fff; padding: 5px 15px; cursor: pointer;">RECARGAR SISTEMA</button>
-            </nav>
-        </header>
+    <main class="container mx-auto px-4 py-10 space-y-16">
 
-        <main>
-            <h2 style="margin-top: 30px;">ESTRENOS 2026 - AUDIO LATINO FORZADO</h2>
-            <div id="player-container">
+        <section class="space-y-6">
+            <div class="flex items-center gap-4">
+                <h2 class="text-4xl font-bold tracking-tight">EN REPRODUCCIÓN <span class="text-zinc-500">(PREMIUM)</span></h2>
+                <span class="text-sm bg-green-950 text-green-400 font-bold px-3 py-1 rounded-full border border-green-800">AUDIO LATINO FORZADO ✔</span>
+            </div>
+            
+            <div class="iframe-container">
                 <iframe 
                     id="main-player"
-                    src="https://vidsrc.pro/embed/movie/933260?audio_lang=es&native_audio=1" 
+                    src="https://superembed.me/movie/933260" 
                     allowfullscreen 
                     allow="autoplay; encrypted-media">
                 </iframe>
             </div>
-            <p style="color: #00ffcc; text-align: center;">Nota: Si el audio inicia en inglés, usa el menú ⚙️ del reproductor para cambiar a 'Spanish'.</p>
-        </main>
-    </div>
+            <p class="text-sm text-zinc-500 text-center">Nota: Si el audio inicia en inglés, el reproductor intentará cambiar automáticamente o puedes usar su menú interno.</p>
+        </section>
 
+        <section class="space-y-6">
+            <h3 class="text-3xl font-semibold">CARRUSEL DE ESTRENOS 2026</h3>
+            <div id="estrenos-carousel" class="splide">
+                <div class="splide__track">
+                    <ul class="splide__list">
+                        <li class="splide__slide">
+                            <img src="https://image.tmdb.org/t/p/w500/or06b45Y8pUvR68b49Y6u574I.jpg" alt="Pelicula 1" onclick="changeVideo('933260')">
+                            <p class="text-xs text-zinc-400 mt-2 text-center">Avatar 3</p>
+                        </li>
+                        <li class="splide__slide">
+                            <img src="https://image.tmdb.org/t/p/w500/g4bXuVHN4Fv7vSdfSskD90wBdf7.jpg" alt="Pelicula 2" onclick="changeVideo('1022789')">
+                            <p class="text-xs text-zinc-400 mt-2 text-center">Inside Out 2</p>
+                        </li>
+                        <li class="splide__slide">
+                            <img src="https://image.tmdb.org/t/p/w500/AOmYAbYn2yU2EwI909yO85iW1z.jpg" alt="Pelicula 3" onclick="changeVideo('823464')">
+                            <p class="text-xs text-zinc-400 mt-2 text-center">Godzilla x Kong</p>
+                        </li>
+                        <li class="splide__slide">
+                            <img src="https://image.tmdb.org/t/p/w500/wP54b23275cbaFkY6b4467554983.jpg" alt="Pelicula 4" onclick="changeVideo('615656')">
+                            <p class="text-xs text-zinc-400 mt-2 text-center">Meg 2</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="space-y-6">
+            <h3 class="text-3xl font-semibold">EL MULTIVERSO DE APPS <span class="text-sm text-zinc-600">(CONECTIVIDAD TOTAL)</span></h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                
+                <div class="app-card p-6 flex flex-col items-center text-center space-y-4">
+                    <img src="https://www.google.com/logos/doodles/2021/december-global-holidays-6753651837109248.5-s.png" alt="Google Play" class="h-16 w-auto object-contain">
+                    <h4 class="font-bold">Google Play</h4>
+                    <p class="text-xs text-zinc-500">Tienda Oficial</p>
+                </div>
+
+                <div class="app-card p-6 flex flex-col items-center text-center space-y-4">
+                    <img src="https://images.vexels.com/media/users/3/137326/isolated/preview/6641657b282d334547926b47e5e33d3c-icono-de-apple-store.png" alt="App Store" class="h-16 w-auto object-contain">
+                    <h4 class="font-bold">App Store</h4>
+                    <p class="text-xs text-zinc-500">Tienda iOS</p>
+                </div>
+
+                <div class="app-card p-6 flex flex-col items-center text-center space-y-4">
+                    <img src="https://logodownload.org/wp-content/uploads/2014/10/netflix-logo-5.png" alt="Netflix" class="h-16 w-auto object-contain">
+                    <h4 class="font-bold">Netflix</h4>
+                    <p class="text-xs text-zinc-500">Streaming Líder</p>
+                </div>
+
+                <div class="app-card p-6 flex flex-col items-center text-center space-y-4">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Amazon_Prime_Video_logo.svg/2560px-Amazon_Prime_Video_logo.svg.png" alt="Prime Video" class="h-16 w-auto object-contain">
+                    <h4 class="font-bold">Prime Video</h4>
+                    <p class="text-xs text-zinc-500">Contenido Original</p>
+                </div>
+
+                <div class="app-card p-6 flex flex-col items-center text-center space-y-4">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Disney%2B_logo.svg/2560px-Disney%2B_logo.svg.png" alt="Disney+" class="h-16 w-auto object-contain">
+                    <h4 class="font-bold">Disney+</h4>
+                    <p class="text-xs text-zinc-500">Magia y Acción</p>
+                </div>
+
+                <div class="app-card p-6 flex flex-col items-center text-center space-y-4">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Hbo-max-logo.png/1200px-Hbo-max-logo.png" alt="HBO Max" class="h-16 w-auto object-contain">
+                    <h4 class="font-bold">HBO Max</h4>
+                    <p class="text-xs text-zinc-500">Series Élite</p>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="border-t border-zinc-800 bg-black mt-20 py-10">
+        <div class="container mx-auto px-4 text-center text-zinc-700 text-sm">
+            <p>&copy; 2026 VENOMSTREAM TITAN. Todos los derechos reservados.</p>
+            <p>Este sistema está optimizado para Audio Latino. ¡VIP ACCESS ACTIVO!</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
     <script>
-        // Simulador de carga Titan OS
-        let prog = document.getElementById('progress');
-        let status = document.getElementById('status');
-        let width = 0;
+        // Inicializar el carrusel
+        document.addEventListener('DOMContentLoaded', function () {
+            new Splide('#estrenos-carousel', {
+                type   : 'loop',
+                perPage: 4,
+                gap    : '1rem',
+                autoplay: true,
+                breakpoints: {
+                    640: { perPage: 2 },
+                    1024: { perPage: 3 },
+                }
+            }).mount();
+        });
 
-        let interval = setInterval(() => {
-            width += Math.random() * 30;
-            if (width >= 100) {
-                width = 100;
-                clearInterval(interval);
-                setTimeout(() => {
-                    document.getElementById('loader').style.display = 'none';
-                    document.getElementById('app-content').style.display = 'block';
-                }, 1000);
-            }
-            prog.style.width = width + '%';
-            if(width > 50) status.innerText = "Desbloqueando protocolos de audio...";
-        }, 400);
-
-        // Función para asegurar el audio latino en la URL
-        function loadContent(type, id) {
+        // Función para cambiar la película en el reproductor principal
+        function changeVideo(movieId) {
             const player = document.getElementById('main-player');
-            // Agregamos parámetros de idioma que solo funcionan correctamente en servidores web
-            player.src = `https://vidsrc.pro/embed/${type}/${id}?audio_lang=es&native_audio=1`;
+            player.src = `https://superembed.me/movie/${movieId}`;
+            // Hacemos scroll suave hacia arriba para ver el reproductor
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
 </body>
