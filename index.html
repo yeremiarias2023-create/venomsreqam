@@ -1,114 +1,427 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-MX">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VENOMSTREAM | Netflix Clone Funcional</title>
+    <title>VENOMSTREAM TITAN | Omni-Revolution OS</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Orbitron:wght@400;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    
     <style>
-        body { background-color: #141414; color: white; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-        .movie-card { transition: transform 0.3s ease; cursor: pointer; }
-        .movie-card:hover { transform: scale(1.1); z-index: 10; }
-        .hero { height: 60vh; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding-bottom: 40px; }
-        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; background: #000; display: none; }
-        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-        .ad-space { background: #1f1f1f; color: #444; text-align: center; padding: 10px; font-size: 10px; border: 1px dashed #333; margin: 15px 0; }
+        /* CORE DESIGN SYSTEM - VENOM BLACK & NEON */
+        :root {
+            --v-neon: #00ff88;
+            --v-cyber: #00f2ff;
+            --v-void: #020202;
+            --v-surface: #0a0a0a;
+            --v-glow: 0 0 50px rgba(0, 255, 136, 0.4);
+            --v-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+
+        body {
+            background-color: var(--v-void);
+            color: #ffffff;
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+        .syncopate { font-family: 'Syncopate', sans-serif; }
+
+        /* --- 1. MOTOR DE PARTÍCULAS DEL FONDO --- */
+        #particle-canvas {
+            position: fixed; inset: 0; z-index: -1;
+            opacity: 0.3; pointer-events: none;
+        }
+
+        /* --- 2. LOADER NEURAL (PROTOCOLO DE ARRANQUE) --- */
+        #neuro-loader {
+            position: fixed; inset: 0; z-index: 1000000;
+            background: #000; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .v-data-stream {
+            width: 300px; height: 4px; background: #111;
+            border-radius: 10px; overflow: hidden; position: relative;
+        }
+        .v-data-stream::after {
+            content: ''; position: absolute; height: 100%; width: 50%;
+            background: var(--v-neon); box-shadow: var(--v-glow);
+            animation: data-flow 1.5s infinite ease-in-out;
+        }
+        @keyframes data-flow { 0% { left: -50%; } 100% { left: 100%; } }
+
+        /* --- 3. NAVEGACIÓN HOLOGRÁFICA --- */
+        .holo-nav {
+            position: fixed; top: 0; width: 100%; z-index: 50000;
+            padding: 30px 5%; display: flex; align-items: center; justify-content: space-between;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.03);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .holo-nav.scrolled { padding: 15px 5%; background: rgba(2, 2, 2, 0.98); border-bottom: 1px solid var(--v-neon); }
+
+        /* --- 4. HERO SECTION "OMNI-VIEW" --- */
+        .hero-omni {
+            height: 100vh; position: relative; display: flex; align-items: center;
+            padding: 0 5%; perspective: 1000px; overflow: hidden;
+        }
+        .hero-bg-media {
+            position: absolute; inset: 0; z-index: -1;
+            transform: scale(1.1); filter: brightness(0.3) contrast(1.2);
+            transition: transform 15s linear;
+        }
+        .hero-omni:hover .hero-bg-media { transform: scale(1.2) rotate(1deg); }
+        .hero-gradient {
+            position: absolute; inset: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(2,2,2,0.9) 0%, transparent 70%);
+        }
+
+        /* --- 5. GRID DE UNIDADES DINÁMICAS (100+ ELEMENTOS) --- */
+        .v-container { padding: 80px 5%; }
+        .v-section-title {
+            font-size: 2.5rem; font-weight: 900; margin-bottom: 40px;
+            display: flex; align-items: center; gap: 20px;
+            letter-spacing: -1px; color: var(--v-neon); text-shadow: var(--v-glow);
+        }
+        .v-section-title::after { content: ''; flex-grow: 1; height: 1px; background: linear-gradient(90deg, var(--v-neon), transparent); }
+
+        .v-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 30px;
+        }
+        .v-unit {
+            background: var(--v-surface); border-radius: 24px; overflow: hidden;
+            position: relative; border: 1px solid #151515;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: pointer; transform-style: preserve-3d;
+        }
+        .v-unit:hover {
+            transform: translateY(-20px) rotateX(10deg) rotateY(-5deg);
+            border-color: var(--v-neon); box-shadow: var(--v-glow);
+        }
+        .v-unit img { width: 100%; height: 100%; object-fit: cover; transition: 1.5s; }
+        .v-unit:hover img { transform: scale(1.1); filter: brightness(0.6); }
+
+        /* --- 6. REPRODUCTOR TITAN OMNI-CORE --- */
+        #titan-player {
+            display: none; position: fixed; inset: 0; z-index: 1000000;
+            background: #000; flex-direction: column;
+        }
+        .p-interface {
+            padding: 25px 50px; background: #050505;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 2px solid #111;
+        }
+        .node-pill {
+            background: #111; padding: 12px 25px; border-radius: 100px;
+            font-size: 11px; font-weight: 900; cursor: pointer;
+            border: 1px solid #222; transition: 0.4s;
+        }
+        .node-pill.active { background: var(--v-neon); color: #000; box-shadow: var(--v-glow); }
+
+        /* --- 7. PANEL VIP "INFINITY" --- */
+        #infinity-panel {
+            display: none; position: fixed; inset: 0; z-index: 600000;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(50px);
+            align-items: center; justify-content: center;
+        }
+        .inf-card {
+            background: #050505; border: 1px solid var(--v-neon);
+            padding: 80px; border-radius: 50px; text-align: center;
+            max-width: 900px; position: relative; overflow: hidden;
+        }
+
+        /* --- HUD DE SISTEMA --- */
+        #v-hud {
+            position: fixed; bottom: 40px; left: 40px; z-index: 1000;
+            background: rgba(0,0,0,0.8); border: 1px solid #222;
+            padding: 15px 25px; border-radius: 15px; font-size: 10px;
+            font-family: monospace; color: var(--v-neon);
+        }
+
     </style>
 </head>
 <body>
 
-    <header class="fixed top-0 w-full z-50 p-5 flex justify-between items-center bg-gradient-to-b from-black to-transparent">
-        <h1 class="text-3xl font-bold text-red-600">VENOMSTREAM</h1>
-    </header>
+    <canvas id="particle-canvas"></canvas>
 
-    <div id="hero-section" class="hero" style="background-image: linear-gradient(to top, #141414, transparent), url('https://image.tmdb.org/t/p/original/m9Y9RYS982YppAs789v8s172DBy.jpg');">
-        <div class="px-10 space-y-4">
-            <h2 id="main-title" class="text-5xl font-bold">BIENVENIDO</h2>
-            <p class="text-zinc-400 max-w-lg">Selecciona una película o serie abajo para comenzar a reproducir. Sistema optimizado para Audio Latino.</p>
+    <div id="neuro-loader">
+        <h1 class="orbitron text-5xl font-black mb-10 tracking-[15px] text-emerald-500">TITAN OS</h1>
+        <div class="v-data-stream"></div>
+        <div id="boot-status" class="mt-6 text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Inyectando Módulos de IA...</div>
+    </div>
+
+    <div id="v-hud">
+        <div>STATUS: TITAN_CORE_ACTIVE</div>
+        <div>LATENCY: <span id="hud-lat">--</span>ms</div>
+        <div>MEM: <span id="hud-mem">--</span>MB</div>
+    </div>
+
+    <nav class="holo-nav" id="main-nav">
+        <div class="flex items-center gap-20">
+            <h1 class="text-4xl font-black italic text-emerald-500 syncopate cursor-pointer">VS</h1>
+            <div class="hidden xl:flex gap-12 font-bold text-[10px] tracking-[4px] text-zinc-400">
+                <a href="#" class="hover:text-emerald-400 transition">MULTIVERSO</a>
+                <a href="#" class="hover:text-emerald-400 transition">SERIES ALPHA</a>
+                <a href="#" class="hover:text-emerald-400 transition">ANIME PRIME</a>
+                <a href="#" onclick="toggleVIP()" class="text-amber-400 animate-pulse">INFINITY VIP</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-10">
+            <div class="relative group">
+                <input type="text" id="omni-search" placeholder="Escanear contenido..." 
+                       class="bg-zinc-900/50 border border-zinc-800 py-3 px-12 rounded-full w-96 outline-none focus:border-emerald-500 transition-all">
+                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-zinc-600"></i>
+            </div>
+            <div class="flex items-center gap-4 border-l border-zinc-800 pl-10">
+                <div class="text-right">
+                    <div class="text-[10px] font-black">YEREMI ELITE</div>
+                    <div class="text-[8px] text-emerald-500 uppercase">Master Admin</div>
+                </div>
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=venom" class="w-12 h-12 bg-zinc-900 rounded-full border border-emerald-500 p-1">
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-omni" id="hero">
+        <div class="hero-gradient"></div>
+        <img id="hero-img" class="hero-bg-media" src="">
+        <div class="relative z-10 max-w-5xl">
+            <div class="flex items-center gap-4 mb-10">
+                <span class="bg-emerald-500 text-black px-6 py-2 font-black text-xs italic">VENOM EXCLUSIVE</span>
+                <span class="text-zinc-500 font-bold" id="hero-meta"></span>
+            </div>
+            <h2 id="hero-title" class="text-[11rem] font-black leading-[0.8] syncopate italic uppercase tracking-tighter mb-12"></h2>
+            <p id="hero-desc" class="text-2xl text-zinc-300 font-light mb-16 line-clamp-3 max-w-3xl leading-relaxed"></p>
+            <div class="flex gap-8">
+                <button id="hero-play" class="bg-white text-black px-20 py-8 font-black text-3xl hover:bg-emerald-400 transition-all hover:scale-110 shadow-[0_0_50px_rgba(255,255,255,0.2)]">
+                    <i class="fas fa-play mr-6"></i> REPRODUCIR
+                </button>
+                <button class="bg-zinc-900/80 backdrop-blur-xl border border-zinc-700 px-12 py-8 font-bold text-2xl hover:bg-zinc-800 transition">DETALLES TÉCNICOS</button>
+            </div>
+        </div>
+    </section>
+
+    <main class="v-container">
+        <section>
+            <h3 class="v-section-title syncopate">TENDENCIAS EN TIEMPO REAL</h3>
+            <div id="grid-trending" class="v-grid"></div>
+        </section>
+
+        <section class="mt-40">
+            <h3 class="v-section-title syncopate">BLOQUE DE SERIES SUPREMAS</h3>
+            <div id="grid-series" class="v-grid"></div>
+        </section>
+    </main>
+
+    <div id="titan-player">
+        <div class="p-interface">
+            <div class="flex items-center gap-10">
+                <button onclick="closePlayer()" class="text-4xl hover:text-emerald-500 transition"><i class="fas fa-chevron-left"></i></button>
+                <div>
+                    <h2 id="p-title" class="orbitron text-2xl text-emerald-400"></h2>
+                    <p class="text-[10px] text-zinc-500 uppercase tracking-widest font-black">Streaming Protegido por Venom-Ciphers</p>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <div class="node-pill active" id="node-1" onclick="switchNode(1)">NODO LATINO SUPREME</div>
+                <div class="node-pill" id="node-2" onclick="switchNode(2)">NODO ALPHA-CORE</div>
+                <div class="node-pill" id="node-3" onclick="switchNode(3)">ENLACE SATELITAL</div>
+            </div>
+            <div class="flex items-center gap-6">
+                <i class="fas fa-cog text-2xl text-zinc-600 hover:text-white cursor-pointer"></i>
+                <div class="bg-emerald-500/10 text-emerald-500 px-4 py-2 rounded font-black text-xs">8K UHD</div>
+            </div>
+        </div>
+        <div class="flex-grow relative bg-black">
+            <div id="p-loader" class="absolute inset-0 flex items-center justify-center bg-black z-50">
+                <div class="w-24 h-24 border-[8px] border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <iframe id="titan-iframe" src="" allowfullscreen frameborder="0"></iframe>
         </div>
     </div>
 
-    <main class="px-10 -mt-10 relative z-10 pb-20">
-        
-        <div id="player-wrapper" class="video-container shadow-2xl mb-10">
-            <iframe id="main-player" src="" allowfullscreen></iframe>
+    <div id="infinity-panel">
+        <div class="inf-card">
+            <div class="absolute -top-20 -left-20 w-80 h-80 bg-emerald-500 blur-[150px] opacity-20"></div>
+            <h2 class="orbitron text-7xl font-black mb-10 text-emerald-400">INFINITY VIP</h2>
+            <p class="text-zinc-400 text-2xl mb-12 font-light">Acceso total al núcleo de Venomstream. Sin publicidad, sin esperas, solo poder.</p>
+            <div class="grid grid-cols-3 gap-10 mb-16">
+                <div class="p-8 bg-zinc-900/50 border border-zinc-800 rounded-3xl">
+                    <i class="fas fa-bolt text-4xl text-emerald-400 mb-6"></i>
+                    <h4 class="font-bold text-lg">FAST-TRACK</h4>
+                    <p class="text-[10px] text-zinc-500 mt-2">Carga prioritaria en servidores dedicados.</p>
+                </div>
+                <div class="p-8 bg-zinc-900/50 border border-zinc-800 rounded-3xl">
+                    <i class="fas fa-eye text-4xl text-emerald-400 mb-6"></i>
+                    <h4 class="font-bold text-lg">OMNI-QUALITY</h4>
+                    <p class="text-[10px] text-zinc-500 mt-2">Desbloquea 8K y audio Dolby Atmos.</p>
+                </div>
+                <div class="p-8 bg-zinc-900/50 border border-zinc-800 rounded-3xl">
+                    <i class="fas fa-download text-4xl text-emerald-400 mb-6"></i>
+                    <h4 class="font-bold text-lg">OFFLINE</h4>
+                    <p class="text-[10px] text-zinc-500 mt-2">Descarga directa a tu almacenamiento.</p>
+                </div>
+            </div>
+            <button class="w-full bg-emerald-500 text-black py-8 font-black text-4xl hover:bg-white transition shadow-[0_0_100px_rgba(0,255,136,0.3)]">ADQUIRIR EL INFINITO</button>
+            <button onclick="toggleVIP()" class="mt-10 text-zinc-600 font-bold hover:text-white transition">VOLVER AL SISTEMA</button>
         </div>
-
-        <div class="ad-space">PUBLICIDAD - ESPACIO DISPONIBLE</div>
-
-        <section class="mb-10">
-            <h3 class="text-xl font-bold mb-4">Películas Estrenos 2026</h3>
-            <div id="movies-list" class="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-6 gap-4">
-                </div>
-        </section>
-
-        <div class="ad-space">PUBLICIDAD - ESPACIO DISPONIBLE</div>
-
-        <section class="mb-10">
-            <h3 class="text-xl font-bold mb-4">Series de TV Populares</h3>
-            <div id="series-list" class="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-6 gap-4">
-                </div>
-        </section>
-
-    </main>
+    </div>
 
     <script>
-        // API KEY FUNCIONAL DE RESPALDO
-        const key = "8f192518e25d4e0e285fcfc76541b58"; 
-        const base_img = "https://image.tmdb.org/t/p/w500";
+        const TITAN_KEY = '8620242a9b3a1a97d91f253676906238';
+        let currentID = '', currentType = '';
 
-        async function fetchContent() {
-            try {
-                // Cargar Películas
-                const resM = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${key}&language=es-MX`);
-                const dataM = await resM.json();
-                const mList = document.getElementById('movies-list');
-                
-                dataM.results.forEach(m => {
-                    const card = document.createElement('div');
-                    card.className = 'movie-card';
-                    card.innerHTML = `<img src="${base_img}${m.poster_path}" class="rounded shadow-lg" onerror="this.src='https://via.placeholder.com/500x750?text=No+Imagen'">`;
-                    card.onclick = () => loadVideo('movie', m.id, m.title, m.backdrop_path);
-                    mList.appendChild(card);
+        // --- MOTOR DE PARTÍCULAS ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function initParticles() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            for(let i=0; i<100; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2,
+                    speedX: Math.random() * 1 - 0.5,
+                    speedY: Math.random() * 1 - 0.5
                 });
-
-                // Cargar Series
-                const resS = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${key}&language=es-MX`);
-                const dataS = await resS.json();
-                const sList = document.getElementById('series-list');
-
-                dataS.results.forEach(s => {
-                    const card = document.createElement('div');
-                    card.className = 'movie-card';
-                    card.innerHTML = `<img src="${base_img}${s.poster_path}" class="rounded shadow-lg" onerror="this.src='https://via.placeholder.com/500x750?text=No+Imagen'">`;
-                    card.onclick = () => loadVideo('tv', s.id, s.name, s.backdrop_path);
-                    sList.appendChild(card);
-                });
-            } catch (error) {
-                console.error("Error cargando contenido:", error);
             }
         }
-
-        function loadVideo(type, id, title, bg) {
-            const player = document.getElementById('main-player');
-            const wrapper = document.getElementById('player-wrapper');
-            const hero = document.getElementById('hero-section');
-            const mainTitle = document.getElementById('main-title');
-
-            // Cambiar servidor a uno más estable para Vercel
-            const server = type === 'movie' 
-                ? `https://vidsrc.to/embed/movie/${id}` 
-                : `https://vidsrc.to/embed/tv/${id}`;
-
-            player.src = server;
-            wrapper.style.display = 'block';
-            mainTitle.innerText = title;
-            hero.style.backgroundImage = `linear-gradient(to top, #141414, transparent), url('https://image.tmdb.org/t/p/original${bg}')`;
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff88';
+            particles.forEach(p => {
+                p.x += p.speedX; p.y += p.speedY;
+                if(p.x > canvas.width) p.x = 0;
+                if(p.y > canvas.height) p.y = 0;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(animateParticles);
         }
 
-        fetchContent();
+        // --- SISTEMA DE ARRANQUE ---
+        async function runTitanOS() {
+            const logs = ["Inyectando Hyper-CSS...", "Sincronizando Nodos...", "Cifrando Conexión...", "Sistema Listo."];
+            let lIdx = 0;
+            const logInterval = setInterval(() => {
+                document.getElementById('boot-status').innerText = logs[lIdx];
+                lIdx++;
+                if(lIdx >= logs.length) clearInterval(logInterval);
+            }, 600);
+
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/trending/all/day?api_key=${TITAN_KEY}&language=es-MX`);
+                const { results } = await res.json();
+                
+                const h = results[0];
+                document.getElementById('hero-img').src = `https://image.tmdb.org/t/p/original${h.backdrop_path}`;
+                document.getElementById('hero-title').innerText = h.title || h.name;
+                document.getElementById('hero-desc').innerText = h.overview;
+                document.getElementById('hero-meta').innerText = `CALIFICACIÓN: ${h.vote_average.toFixed(1)} ★ | POPULARIDAD: ${Math.floor(h.popularity)}`;
+                document.getElementById('hero-play').onclick = () => openPlayer(h.id, h.media_type, h.title || h.name);
+
+                fillGrid('grid-trending', results);
+
+                const res2 = await fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${TITAN_KEY}&language=es-MX`);
+                const data2 = await res2.json();
+                fillGrid('grid-series', data2.results);
+
+                setTimeout(() => {
+                    document.getElementById('neuro-loader').style.opacity = '0';
+                    setTimeout(() => document.getElementById('neuro-loader').remove(), 1000);
+                }, 3000);
+
+            } catch (e) { console.error("FATAL_CORE_ERROR: API LINK BROKEN"); }
+        }
+
+        function fillGrid(container, data) {
+            const el = document.getElementById(container);
+            el.innerHTML = data.map(m => `
+                <div class="v-unit" onclick="openPlayer(${m.id}, '${m.media_type || (m.title ? 'movie' : 'tv')}', '${(m.title || m.name).replace(/'/g, "")}')">
+                    <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" loading="lazy">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity p-6 flex flex-col justify-end">
+                        <h4 class="font-black italic text-sm mb-1 text-emerald-400 uppercase">${m.title || m.name}</h4>
+                        <p class="text-[9px] font-bold text-zinc-500">TITAN CERTIFIED • 8K</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- PLAYER ENGINE ---
+        function openPlayer(id, type, title) {
+            currentID = id; currentType = type;
+            document.getElementById('p-title').innerText = title;
+            document.getElementById('titan-player').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            switchNode(1);
+        }
+
+        function switchNode(n) {
+            const frame = document.getElementById('titan-iframe');
+            const loader = document.getElementById('p-loader');
+            loader.style.display = 'flex';
+            
+            document.querySelectorAll('.node-pill').forEach(p => p.classList.remove('active'));
+            document.getElementById('node-'+n).classList.add('active');
+
+            let url = "";
+            const audioParams = "&audio_lang=es&native_audio=1&primary_audio=latino";
+            
+            if(n === 1) url = `https://vidsrc.pro/embed/${currentType}/${currentID}?${audioParams}`;
+            if(n === 2) url = `https://vidsrc.cc/v2/embed/${currentType}/${currentID}?${audioParams}`;
+            if(n === 3) url = `https://superembed.me/movie/${currentID}`;
+
+            frame.src = url;
+            frame.onload = () => loader.style.display = 'none';
+        }
+
+        function closePlayer() {
+            document.getElementById('titan-player').style.display = 'none';
+            document.getElementById('titan-iframe').src = "";
+            document.body.style.overflow = 'auto';
+        }
+
+        // --- OMNI SEARCH ---
+        document.getElementById('omni-search').addEventListener('input', async (e) => {
+            const q = e.target.value;
+            if(q.length < 3) return;
+            const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TITAN_KEY}&language=es-MX&query=${q}`);
+            const { results } = await res.json();
+            fillGrid('grid-trending', results);
+            document.getElementById('hero').style.display = 'none';
+        });
+
+        // --- VIP TOGGLE ---
+        function toggleVIP() {
+            const p = document.getElementById('infinity-panel');
+            p.style.display = (p.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        // --- HUD UPDATER ---
+        setInterval(() => {
+            document.getElementById('hud-lat').innerText = Math.floor(Math.random() * 20 + 5);
+            document.getElementById('hud-mem').innerText = Math.floor(Math.random() * 100 + 400);
+        }, 2000);
+
+        window.onscroll = () => {
+            const nav = document.getElementById('main-nav');
+            if(window.scrollY > 100) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        }
+
+        initParticles();
+        animateParticles();
+        runTitanOS();
     </script>
 </body>
 </html>
