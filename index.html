@@ -1,205 +1,75 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE html>
-<html b:css='false' b:defaultwidgetversion='2' b:js='true' b:layoutsVersion='3' expr:dir='data:blog.locale.languageDirection' expr:lang='data:blog.locale.language' prefix='og: http://ogp.me/ns#' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
-<head>
-  <meta charset='utf-8'/>
-  <meta content='width=device-width, initial-scale=1, user-scalable=yes' name='viewport'/>
-  <meta content='#0f172a' name='theme-color'/>
-  <title><data:view.title.escaped/> | VenomStream</title>
-  <b:include data='blog' name='all-head-content'/>
+<script>
+// --- CONFIGURACIÓN ---
+const API_KEY = '9687248249326410'; // Tu API Key detectada
+const LANG = 'es-MX'; // Cambia a 'es-ES' si prefieres español de España
+const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 
-  <!-- Tailwind + Font Awesome -->
-  <script src='https://cdn.tailwindcss.com'></script>
-  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'/>
-  <!-- Splide CSS/JS -->
-  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css'/>
-  <script src='https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js'></script>
+// Función para abrir el reproductor (Embed de terceros)
+function abrirReproductor(id, tipo) {
+    // Usamos un servidor de Video Embed que soporta IDs de TMDB
+    // Nota: Estos servidores suelen tener publicidad propia.
+    const playerUrl = `https://vidsrc.to/embed/${tipo}/${id}`; 
+    
+    // Creamos un modal simple para el video
+    const videoHTML = `
+        <div id="video-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <button onclick="document.getElementById('video-modal').remove()" style="margin-bottom:10px;padding:10px 20px;background:#d60043;color:white;border:none;cursor:pointer;border-radius:5px;">CERRAR REPRODUCTOR</button>
+            <iframe src="${playerUrl}" width="80%" height="70%" frameborder="0" allowfullscreen></iframe>
+        </div>`;
+    document.body.insertAdjacentHTML('beforeend', videoHTML);
+}
 
-  <style>
-    /* Estilos base */
-    body {
-      background: #0a0c10;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      color: #e5e7eb;
-    }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #1f2937; }
-    ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
-    .carousel-title {
-      font-weight: 700;
-      font-size: 1.5rem;
-      margin: 1.5rem 0 1rem 0;
-      padding-left: 1rem;
-      border-left: 4px solid #10b981;
-    }
-    @media (max-width: 640px) {
-      .carousel-title { font-size: 1.2rem; }
-    }
-    .movie-card {
-      background: #111827;
-      border-radius: 1rem;
-      overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s;
-      cursor: pointer;
-      border: 1px solid #1f2937;
-    }
-    .movie-card:hover {
-      transform: scale(1.02);
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5), 0 0 0 1px #10b981;
-    }
-    /* Flechas de Splide más grandes y visibles */
-    .splide__arrow {
-      background: rgba(0,0,0,0.7);
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      opacity: 0.9;
-    }
-    .splide__arrow svg {
-      fill: #10b981;
-    }
-    .splide__arrow:hover {
-      background: #10b981;
-    }
-    .splide__arrow:hover svg {
-      fill: black;
-    }
-    @media (max-width: 640px) {
-      .splide__arrow { width: 36px; height: 36px; }
-    }
-    /* Mensaje de ayuda */
-    .venom-audio-hint {
-      background: rgba(16,185,129,0.15);
-      border-left: 3px solid #10b981;
-      font-size: 0.75rem;
-      padding: 0.5rem;
-      border-radius: 0.5rem;
-      margin-top: 0.5rem;
-      text-align: center;
-      color: #e5e7eb;
-    }
-    .venom-audio-hint i { margin-right: 0.25rem; color: #10b981; }
-    /* Reproductor iframe */
-    iframe {
-      width: 100%;
-      min-height: 400px;
-      border: none;
-      border-radius: 0.5rem;
-    }
-    @media (max-width: 640px) {
-      iframe { min-height: 250px; }
-    }
-    /* Cabecera */
-    .header-glass {
-      background: rgba(10,12,16,0.8);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(16,185,129,0.3);
-    }
-  </style>
+// --- FUNCIÓN PARA CREAR EL DISEÑO (Peliculas y Series) ---
+function crearCard(item, esSerie = false) {
+    const titulo = esSerie ? item.name : item.title;
+    const tipo = esSerie ? 'tv' : 'movie';
+    const id = item.id;
 
-  <script>
-    // Reemplaza los enlaces de los iframes para usar vidsrc.pro con español latino
-    function replaceEmbedLinks() {
-      const oldDomains = [
-        'embedsu.com', 'embed.su', 'vidsrc.pro', 'vidsrc.cc',
-        'multiembed.mx', 'autoembed.co', '2embed.cc'
-      ];
-      const newBase = 'https://vidsrc.pro/embed/';
-      const langParams = '?audio_lang=es&primary_audio=latino&native_audio=1';
-
-      document.querySelectorAll('iframe').forEach(iframe => {
-        let src = iframe.getAttribute('src');
-        if (!src) return;
-        let needReplace = false;
-        for (let domain of oldDomains) {
-          if (src.includes(domain)) { needReplace = true; break; }
-        }
-        if (needReplace) {
-          let match = src.match(/\/(movie|tv)\/(\d+)/);
-          if (match) {
-            let type = match[1];
-            let id = match[2];
-            let newSrc = newBase + type + '/' + id + langParams;
-            iframe.setAttribute('src', newSrc);
-          }
-        }
-      });
-    }
-
-    // Añade el mensaje de ayuda después de los iframes de video
-    function addAudioHint() {
-      document.querySelectorAll('.post-body iframe, .video-container iframe').forEach(iframe => {
-        let parent = iframe.parentNode;
-        if (!parent.querySelector('.venom-audio-hint')) {
-          let hint = document.createElement('div');
-          hint.className = 'venom-audio-hint';
-          hint.innerHTML = '<i class="fas fa-volume-up"></i> ¿El audio está en inglés? Dentro del reproductor, busca el ícono de configuración (⚙️) o de audio (🔊) y selecciona <strong>Español Latino</strong>.';
-          parent.insertBefore(hint, iframe.nextSibling);
-        }
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      replaceEmbedLinks();
-      addAudioHint();
-    });
-    const observer = new MutationObserver(() => {
-      replaceEmbedLinks();
-      addAudioHint();
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-  </script>
-</head>
-<body>
-  <b:section class='header' id='header' maxwidgets='1' name='Header' showaddelement='no'>
-    <b:widget id='Header1' locked='true' title='VenomStream (cabecera)' type='Header'>
-      <b:includable id='main'>
-        <div class='header-glass sticky top-0 z-50 px-4 py-3 flex justify-between items-center'>
-          <div class='flex items-center gap-2'>
-            <i class='fa-solid fa-bolt text-2xl text-emerald-400'></i>
-            <h1 class='text-2xl font-black bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent'>
-              <a expr:href='data:blog.homepageUrl'>Venom<span class='text-white'>Stream</span></a>
-            </h1>
-          </div>
-          <div class='flex gap-2'>
-            <input id='searchInput' placeholder='Buscar...' class='bg-gray-900/80 border border-gray-700 rounded-full py-2 px-4 text-sm text-white'/>
-            <button id='searchBtn' class='bg-emerald-600 hover:bg-emerald-500 px-4 rounded-full text-sm font-bold'>Buscar</button>
-          </div>
+    return `
+    <div class="crd">
+      <div class="crd__image">
+        <img src="${IMG_BASE}${item.poster_path}" alt="${titulo}" onerror="this.src='https://via.placeholder.com/500x750?text=No+Image'">
+        <div class="play" onclick="abrirReproductor(${id}, '${tipo}')">
+            <i class="fa-solid fa-play"></i> VER AHORA (ES)
         </div>
-      </b:includable>
-    </b:widget>
-  </b:section>
+      </div>
+      <div class="crd__body">
+        <h2 class="crd__title">${titulo}</h2>
+      </div>
+    </div>`;
+}
 
-  <div class='max-w-7xl mx-auto px-4 py-6'>
-    <b:section class='main' id='main' name='Main' showaddelement='yes'>
-      <b:widget id='Blog1' locked='true' title='Entradas del blog' type='Blog'>
-        <b:includable id='main'>
-          <b:loop values='data:posts' var='post'>
-            <article class='mb-12'>
-              <h2 class='text-2xl font-bold mb-2'><a expr:href='data:post.url'><data:post.title/></a></h2>
-              <div class='post-body'><data:post.body/></div>
-              <b:if cond='data:post.includeAd'>...</b:if>
-            </article>
-          </b:loop>
-          <b:include name='nextprev'/>
-        </b:includable>
-      </b:widget>
-    </b:section>
-  </div>
+// --- CARGA INICIAL ---
+async function cargarContenido() {
+    const container = document.querySelector('.wgts-pp');
+    if (!container) return;
 
-  <footer class='text-center text-gray-500 text-xs py-6 border-t border-gray-800 mt-10'>
-    VenomStream © • Contenido por fuentes externas • Audio español disponible en la mayoría de títulos.
-  </footer>
+    try {
+        // Pedimos Películas y Series populares al mismo tiempo
+        const [resPelis, resSeries] = await Promise.all([
+            fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=${LANG}`),
+            fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${API_KEY}&language=${LANG}`)
+        ]);
 
-  <!-- Script para búsqueda (opcional) -->
-  <script>
-    document.getElementById('searchBtn')?.addEventListener('click', () => {
-      let query = document.getElementById('searchInput').value.trim();
-      if (query) location.href = '/search?q=' + encodeURIComponent(query);
-    });
-    document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') document.getElementById('searchBtn').click();
-    });
-  </script>
-</body>
-</html>
+        const dataPelis = await resPelis.json();
+        const dataSeries = await resSeries.json();
+
+        container.innerHTML = ''; // Limpiar diseño anterior
+
+        // Mostrar las primeras 10 Películas
+        dataPelis.results.slice(0, 10).forEach(p => {
+            container.innerHTML += crearCard(p, false);
+        });
+
+        // Mostrar las primeras 10 Series
+        dataSeries.results.slice(0, 10).forEach(s => {
+            container.innerHTML += crearCard(s, true);
+        });
+
+    } catch (error) {
+        console.error("Error cargando TMDB:", error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', cargarContenido);
+</script>
