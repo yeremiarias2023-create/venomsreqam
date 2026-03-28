@@ -1,260 +1,190 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>STREAMIX ULTRA</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venomstream Elite | El Rey del Cine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; margin: 0; }
+        
+        /* Animación de entrada de tarjetas */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .movie-card { animation: fadeInUp 0.5s ease forwards; border: 1px solid #1e293b; background: #0f172a; transition: 0.4s; }
+        .movie-card:hover { transform: scale(1.05); border-color: #10b981; box-shadow: 0 0 25px rgba(16, 185, 129, 0.4); }
 
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4/dist/css/splide.min.css">
+        /* Carrusel Pro */
+        #carousel { height: 600px; position: relative; overflow: hidden; }
+        .carousel-item { position: absolute; inset: 0; opacity: 0; transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: flex-end; }
+        .carousel-item.active { opacity: 1; }
+        .carousel-gradient { position: absolute; inset: 0; background: linear-gradient(0deg, #020617 10%, transparent 100%), linear-gradient(90deg, #020617 0%, transparent 50%); }
 
-<style>
-body { background:#0b0b0b; color:white; font-family:system-ui; }
+        /* Espacio para tus anuncios monetizados */
+        .ad-space { background: #111827; border: 1px dashed #374151; display: flex; align-items: center; justify-content: center; color: #4b5563; font-size: 10px; text-transform: uppercase; }
 
-/* CARD */
-.card { transition:.3s; cursor:pointer; position:relative; }
-.card:hover { transform:scale(1.1); z-index:10; }
+        /* Modal Ultra */
+        #reproductor-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; backdrop-filter: blur(10px); }
+        .iframe-container { width: 95%; max-width: 1100px; aspect-ratio: 16/9; background: #000; border: 3px solid #10b981; border-radius: 20px; overflow: hidden; box-shadow: 0 0 60px rgba(16, 185, 129, 0.3); }
 
-.overlay {
-    position:absolute;
-    bottom:0;
-    left:0;
-    right:0;
-    padding:10px;
-    background:linear-gradient(transparent, rgba(0,0,0,0.9));
-    opacity:0;
-    transition:.3s;
-}
-.card:hover .overlay { opacity:1; }
-
-/* HERO */
-.hero {
-    height:60vh;
-    background-size:cover;
-    background-position:center;
-    display:flex;
-    align-items:end;
-    padding:40px;
-}
-
-/* MODAL */
-.modal {
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.9);
-    display:none;
-    justify-content:center;
-    align-items:center;
-}
-
-/* SKELETON */
-.skeleton {
-    background:linear-gradient(90deg,#111,#222,#111);
-    animation:load 1.5s infinite;
-}
-@keyframes load {
-    0%{background-position:-200px}
-    100%{background-position:200px}
-}
-</style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+    </style>
 </head>
-
 <body>
 
-<!-- NAV -->
-<nav class="fixed w-full z-50 bg-black/90 p-4 flex justify-between items-center border-b border-zinc-800">
-<h1 class="text-2xl font-black text-red-600">STREAMIX+</h1>
-
-<div class="flex gap-3 items-center">
-<input id="search" placeholder="Buscar..." class="bg-zinc-800 px-4 py-2 rounded-full text-sm outline-none">
-<button onclick="showFavorites()" class="text-sm bg-red-600 px-3 py-1 rounded">❤️</button>
-</div>
-</nav>
-
-<!-- HERO -->
-<div id="hero" class="hero mt-16"></div>
-
-<main class="px-6 max-w-7xl mx-auto">
-
-<!-- CONTINUAR -->
-<section class="my-8">
-<h2 class="text-lg text-zinc-400 mb-3">Seguir viendo</h2>
-<div id="continue" class="flex gap-4 overflow-x-auto"></div>
-</section>
-
-<!-- GENEROS -->
-<section class="mb-6">
-<h2 class="text-lg mb-2">Géneros</h2>
-<div id="genres" class="flex gap-2 flex-wrap"></div>
-</section>
-
-<!-- GRID -->
-<section>
-<h2 class="text-lg text-zinc-400 mb-4">Explorar</h2>
-<div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
-</section>
-
-</main>
-
-<!-- MODAL PLAYER -->
-<div id="modal" class="modal">
-<div class="w-[90%] md:w-[70%] aspect-video">
-<iframe id="player" class="w-full h-full rounded-xl" allowfullscreen></iframe>
-</div>
-<button onclick="closePlayer()" class="absolute top-5 right-5 text-white text-xl">✖</button>
-</div>
-
-<script>
-const API="https://api.themoviedb.org/3";
-const KEY="TU_API_KEY_AQUI";
-const IMG="https://image.tmdb.org/t/p/w500";
-
-let favorites = JSON.parse(localStorage.getItem("fav")) || [];
-let continueWatching = JSON.parse(localStorage.getItem("cont")) || [];
-
-// INIT
-async function init(){
-    showSkeleton();
-
-    const movies = await fetch(`${API}/movie/popular?api_key=${KEY}&language=es`).then(r=>r.json());
-    const genres = await fetch(`${API}/genre/movie/list?api_key=${KEY}&language=es`).then(r=>r.json());
-
-    renderHero(movies.results[0]);
-    renderGrid(movies.results);
-    renderGenres(genres.genres);
-    renderContinue();
-}
-
-// HERO
-function renderHero(movie){
-    document.getElementById("hero").style.backgroundImage =
-    `linear-gradient(to top, #0b0b0b, transparent), url(${IMG+movie.backdrop_path})`;
-
-    document.getElementById("hero").innerHTML = `
-    <div>
-        <h1 class="text-3xl font-bold">${movie.title}</h1>
-        <p class="text-sm max-w-md mt-2">${movie.overview}</p>
-        <button onclick="play('movie',${movie.id})" class="mt-3 bg-red-600 px-4 py-2 rounded">▶ Ver</button>
-    </div>`;
-}
-
-// GRID
-function renderGrid(data){
-    const grid = document.getElementById("grid");
-    grid.innerHTML="";
-
-    data.forEach(item=>{
-        const fav = favorites.includes(item.id);
-
-        grid.innerHTML += `
-        <div class="card">
-            <img onclick="play('movie',${item.id})" src="${IMG+item.poster_path}" class="rounded-lg">
-            <div class="overlay text-xs flex justify-between">
-                <span>${item.title}</span>
-                <button onclick="toggleFav(${item.id})">${fav?"❤️":"🤍"}</button>
+    <header class="p-6 bg-black/80 sticky top-0 z-[100] border-b border-emerald-900/30 backdrop-blur-xl">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3 group cursor-pointer">
+                <div class="text-4xl group-hover:rotate-12 transition-transform">🐍</div>
+                <h1 class="text-4xl font-black italic tracking-tighter text-white">VENOM<span class="text-emerald-500">STREAM</span></h1>
             </div>
-        </div>`;
-    });
-}
+            <div class="relative w-full md:w-96">
+                <input type="text" id="search" placeholder="Busca tu película o anime..." 
+                    class="w-full bg-zinc-900 border border-emerald-800/50 p-4 rounded-2xl text-white outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all">
+                <span class="absolute right-4 top-4 opacity-50">🔍</span>
+            </div>
+        </div>
+    </header>
 
-// GENEROS
-function renderGenres(genres){
-    const container = document.getElementById("genres");
+    <section id="carousel"></section>
 
-    genres.forEach(g=>{
-        container.innerHTML += `
-        <button onclick="filterGenre(${g.id})" class="bg-zinc-800 px-3 py-1 rounded text-sm">
-        ${g.name}
-        </button>`;
-    });
-}
+    <nav class="bg-zinc-950/90 py-4 sticky top-[100px] z-[90] border-b border-emerald-900/20 overflow-x-auto">
+        <div class="container mx-auto flex gap-4 px-6" id="categories-list">
+            <button class="category-btn active px-6 py-2 rounded-xl bg-emerald-600 text-black font-bold text-sm" data-genre="">🔥 Tendencias</button>
+            <button class="category-btn px-6 py-2 rounded-xl bg-zinc-800 font-bold text-sm hover:bg-emerald-900" data-genre="28">Acción</button>
+            <button class="category-btn px-6 py-2 rounded-xl bg-zinc-800 font-bold text-sm hover:bg-emerald-900" data-genre="16">Anime</button>
+            <button class="category-btn px-6 py-2 rounded-xl bg-zinc-800 font-bold text-sm hover:bg-emerald-900" data-genre="27">Terror</button>
+            <button class="category-btn px-6 py-2 rounded-xl bg-zinc-800 font-bold text-sm hover:bg-emerald-900" data-genre="878">Ciencia Ficción</button>
+        </div>
+    </nav>
 
-// FILTRAR
-async function filterGenre(id){
-    const res = await fetch(`${API}/discover/movie?api_key=${KEY}&with_genres=${id}`);
-    const data = await res.json();
-    renderGrid(data.results);
-}
+    <main class="container mx-auto p-6">
+        
+        <div class="ad-space w-full h-24 mb-10 rounded-xl">Tu Publicidad de Adsense / Empresa Aquí</div>
 
-// BUSCAR
-document.getElementById("search").addEventListener("input", async e=>{
-    const q = e.target.value;
-    if(q.length<3) return init();
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-1 h-8 bg-emerald-500 shadow-[0_0_10px_#10b981]"></div>
+            <h2 id="titulo-seccion" class="text-3xl font-black italic uppercase tracking-widest">Lo más visto</h2>
+        </div>
 
-    const res = await fetch(`${API}/search/movie?api_key=${KEY}&query=${q}`);
-    const data = await res.json();
-    renderGrid(data.results);
-});
+        <div id="grid-peliculas" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+    </main>
 
-// PLAYER
-function play(type,id){
-    document.getElementById("modal").style.display="flex";
-    document.getElementById("player").src=`https://vidsrc.to/embed/${type}/${id}`;
+    <div id="reproductor-modal" class="flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-[1100px] flex justify-between items-center mb-6">
+            <div class="flex flex-col">
+                <span id="peli-nombre" class="text-2xl font-black text-emerald-400 italic"></span>
+                <span class="text-[10px] text-zinc-500 uppercase tracking-widest">Modo Cine Activado</span>
+            </div>
+            <button onclick="cerrarReproductor()" class="bg-white/10 hover:bg-red-600 p-3 rounded-full transition-all">✖</button>
+        </div>
 
-    if(!continueWatching.includes(id)){
-        continueWatching.push(id);
-        localStorage.setItem("cont", JSON.stringify(continueWatching));
-    }
+        <div class="ad-space w-full max-w-[1100px] h-12 mb-2 rounded-t-lg">Anuncio VIP</div>
 
-    renderContinue();
-}
+        <div class="iframe-container">
+            <iframe id="video-frame" src="" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+        </div>
 
-function closePlayer(){
-    document.getElementById("modal").style.display="none";
-    document.getElementById("player").src="";
-}
+        <div class="flex flex-wrap gap-4 mt-8 justify-center">
+            <button onclick="cambiarServidor(1)" class="bg-emerald-500 text-black px-6 py-2 rounded-full font-bold text-sm hover:scale-105 transition">LATINO / ESP 1</button>
+            <button onclick="cambiarServidor(2)" class="bg-zinc-800 px-6 py-2 rounded-full font-bold text-sm hover:bg-zinc-700 transition">OPCIÓN 2</button>
+            <button onclick="location.reload()" class="bg-red-900/50 px-6 py-2 rounded-full font-bold text-sm border border-red-500">REPARAR VIDEO</button>
+        </div>
+    </div>
 
-// FAVORITOS
-function toggleFav(id){
-    if(favorites.includes(id)){
-        favorites = favorites.filter(f=>f!==id);
-    } else {
-        favorites.push(id);
-    }
-    localStorage.setItem("fav", JSON.stringify(favorites));
-    init();
-}
+    <script>
+        const API_KEY = 'b6f588916e25d4e0e285fcfc76541b58';
+        let currentMedia = { id: '', tipo: '' };
 
-function showFavorites(){
-    filterCustom(favorites);
-}
+        // 1. Cargar Carrusel Pro
+        async function cargarCarrusel() {
+            const res = await fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}&language=es-ES`);
+            const { results } = await res.json();
+            const slides = results.slice(0, 5);
 
-// CONTINUAR
-async function renderContinue(){
-    const container = document.getElementById("continue");
-    container.innerHTML="";
+            document.getElementById('carousel').innerHTML = slides.map((m, i) => `
+                <div class="carousel-item ${i === 0 ? 'active' : ''}" style="background: url('https://image.tmdb.org/t/p/original${m.backdrop_path}') center/cover;">
+                    <div class="carousel-gradient"></div>
+                    <div class="relative z-10 p-12 mb-10 max-w-3xl">
+                        <span class="bg-emerald-500 text-black text-[10px] font-bold px-3 py-1 rounded-full mb-4 inline-block uppercase">Destacado Venom</span>
+                        <h2 class="text-6xl font-black italic uppercase mb-4 leading-none">${m.title || m.name}</h2>
+                        <p class="text-zinc-400 text-sm mb-8 line-clamp-2">${m.overview}</p>
+                        <div class="flex gap-4">
+                            <button onclick="reproducir(${m.id}, '${m.media_type}', '${m.title || m.name}')" class="bg-emerald-500 text-black px-10 py-4 rounded-2xl font-black hover:bg-white transition-all">VER AHORA</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
 
-    for(let id of continueWatching.slice(-10)){
-        const res = await fetch(`${API}/movie/${id}?api_key=${KEY}`);
-        const m = await res.json();
+            let c = 0;
+            setInterval(() => {
+                const items = document.querySelectorAll('.carousel-item');
+                if(!items.length) return;
+                items[c].classList.remove('active');
+                c = (c + 1) % items.length;
+                items[c].classList.add('active');
+            }, 8000);
+        }
 
-        container.innerHTML += `
-        <img onclick="play('movie',${id})"
-        src="${IMG+m.poster_path}"
-        class="w-32 rounded cursor-pointer">`;
-    }
-}
+        // 2. Cargar Grid de Películas
+        async function cargarGrid(query = '', genre = '') {
+            let url = `https://api.themoviedb.org/3/trending/all/day?api_key=${API_KEY}&language=es-ES`;
+            if(query) url = `https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&language=es-ES&query=${query}`;
+            if(genre) url = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&language=es-ES&with_genres=${genre}`;
 
-// FILTRO CUSTOM
-async function filterCustom(ids){
-    const results=[];
-    for(let id of ids){
-        const res = await fetch(`${API}/movie/${id}?api_key=${KEY}`);
-        results.push(await res.json());
-    }
-    renderGrid(results);
-}
+            const res = await fetch(url);
+            const data = await res.json();
+            
+            document.getElementById('grid-peliculas').innerHTML = data.results.map(m => m.poster_path ? `
+                <div class="movie-card rounded-2xl overflow-hidden shadow-xl" onclick="reproducir(${m.id}, '${m.media_type || 'movie'}', '${m.title || m.name}')">
+                    <div class="relative overflow-hidden group">
+                        <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                    <div class="p-4 bg-zinc-900/50">
+                        <h3 class="font-bold text-[11px] truncate uppercase tracking-tighter">${m.title || m.name}</h3>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-emerald-500 text-[9px] font-black">4K ULTRA HD</span>
+                            <span class="text-zinc-500 text-[9px]">⭐ ${m.vote_average.toFixed(1)}</span>
+                        </div>
+                    </div>
+                </div>
+            ` : '').join('');
+        }
 
-// SKELETON
-function showSkeleton(){
-    const grid = document.getElementById("grid");
-    for(let i=0;i<12;i++){
-        grid.innerHTML += `<div class="h-40 skeleton rounded"></div>`;
-    }
-}
+        function reproducir(id, tipo, nombre) {
+            currentMedia = { id, tipo };
+            document.getElementById('peli-nombre').innerText = nombre;
+            cambiarServidor(1);
+            document.getElementById('reproductor-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
 
-init();
-</script>
+        function cambiarServidor(n) {
+            const { id, tipo } = currentMedia;
+            const url = n === 1 
+                ? `https://vidsrc.to/embed/${tipo === 'tv' ? 'tv' : 'movie'}/${id}`
+                : `https://vidsrc.xyz/embed/${tipo === 'tv' ? 'tv' : 'movie'}/${id}`;
+            document.getElementById('video-frame').src = url;
+        }
 
+        function cerrarReproductor() {
+            document.getElementById('reproductor-modal').style.display = 'none';
+            document.getElementById('video-frame').src = '';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Buscador y Categorías
+        document.getElementById('search').addEventListener('input', (e) => cargarGrid(e.target.value));
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelector('.category-btn.active').classList.remove('active', 'bg-emerald-600', 'text-black');
+                btn.classList.add('active', 'bg-emerald-600', 'text-black');
+                cargarGrid('', btn.dataset.genre);
+            }
+        });
+
+        window.onload = () => { cargarCarrusel(); cargarGrid(); };
+    </script>
 </body>
 </html>
