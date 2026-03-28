@@ -2,7 +2,7 @@
 <html lang="es-MX">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>VenomStream | Películas y Series en Español</title>
     <!-- Tailwind + Font Awesome + Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -40,15 +40,18 @@
             transform: scale(1.03);
             box-shadow: 0 20px 25px -12px rgba(0,0,0,0.8), 0 0 0 2px #10b981;
         }
-        /* Botones de navegación de Swiper (flechas) siempre visibles */
+        /* Botones de navegación de Swiper (flechas) siempre visibles y táctiles */
         .swiper-button-next, .swiper-button-prev {
             color: #10b981 !important;
             background: rgba(0,0,0,0.8);
-            width: 44px;
-            height: 44px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             transition: 0.2s;
-            opacity: 0.7;
+            opacity: 0.8;
+        }
+        .swiper-button-next:active, .swiper-button-prev:active {
+            transform: scale(0.95);
         }
         .swiper-button-next:hover, .swiper-button-prev:hover {
             opacity: 1;
@@ -81,7 +84,7 @@
             visibility: visible;
         }
         .modal-container {
-            max-width: 90vw;
+            max-width: 95vw;
             width: 1000px;
             max-height: 85vh;
             background: #0f172a;
@@ -104,19 +107,44 @@
         }
         .server-btn, .lang-btn {
             transition: all 0.2s;
+            min-width: 70px;
+            text-align: center;
+            padding: 0.5rem 0.75rem;
         }
         .server-btn.active, .lang-btn.active {
             background-color: #10b981;
             color: black;
             border-color: #10b981;
         }
-        /* Botón de scroll suave */
-        .smooth-scroll {
-            scroll-behavior: smooth;
+        .audio-hint {
+            background: rgba(16, 185, 129, 0.2);
+            border-left: 3px solid #10b981;
+        }
+        /* Ajustes móviles */
+        @media (max-width: 640px) {
+            .server-btn, .lang-btn {
+                min-width: 60px;
+                font-size: 0.7rem;
+                padding: 0.4rem 0.5rem;
+            }
+            .modal-container {
+                max-width: 95vw;
+                border-radius: 1.5rem;
+            }
+            iframe {
+                min-height: 300px;
+            }
+            .swiper-button-next, .swiper-button-prev {
+                width: 40px;
+                height: 40px;
+            }
+            .swiper-button-next:after, .swiper-button-prev:after {
+                font-size: 1rem !important;
+            }
         }
     </style>
 </head>
-<body class="text-gray-200 smooth-scroll">
+<body class="text-gray-200">
 
     <!-- Header -->
     <header class="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-emerald-900/40 shadow-lg">
@@ -125,11 +153,15 @@
                 <i class="fa-solid fa-bolt text-3xl text-emerald-400"></i>
                 <h1 class="text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">Venom<span class="text-white">Stream</span></h1>
             </div>
-            <div class="flex flex-1 max-w-lg w-full md:w-auto relative">
-                <input type="text" id="searchInput" placeholder="Buscar películas, series, actores..." class="w-full bg-gray-900/80 border border-gray-700 rounded-full py-3 pl-12 pr-4 text-white placeholder:text-gray-400 focus:outline-none focus:border-emerald-500 transition">
-                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                <button id="searchBtn" class="ml-2 bg-emerald-600 hover:bg-emerald-500 transition px-5 rounded-full font-bold">Buscar</button>
-                <button id="clearSearchBtn" class="ml-2 bg-gray-800 hover:bg-gray-700 transition px-4 rounded-full text-sm hidden">✕ Limpiar</button>
+            <div class="flex flex-1 max-w-lg w-full md:w-auto relative flex-col sm:flex-row gap-2">
+                <div class="relative flex-1">
+                    <input type="text" id="searchInput" placeholder="Buscar películas, series, actores..." class="w-full bg-gray-900/80 border border-gray-700 rounded-full py-3 pl-12 pr-4 text-white placeholder:text-gray-400 focus:outline-none focus:border-emerald-500 transition">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                <div class="flex gap-2">
+                    <button id="searchBtn" class="bg-emerald-600 hover:bg-emerald-500 transition px-5 rounded-full font-bold py-2">Buscar</button>
+                    <button id="clearSearchBtn" class="bg-gray-800 hover:bg-gray-700 transition px-4 rounded-full text-sm hidden">✕ Limpiar</button>
+                </div>
             </div>
         </div>
     </header>
@@ -137,7 +169,7 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <!-- Sección resultados búsqueda (oculta por defecto) -->
         <div id="searchResultsSection" class="hidden mb-12">
-            <div class="flex justify-between items-center border-b border-gray-800 pb-3 mb-6">
+            <div class="flex justify-between items-center border-b border-gray-800 pb-3 mb-6 flex-wrap gap-2">
                 <h2 class="text-2xl font-black flex items-center gap-2"><i class="fa-solid fa-magnifying-glass text-emerald-400"></i> Resultados</h2>
                 <button id="closeSearchBtn" class="bg-gray-800 px-5 py-2 rounded-full text-sm hover:bg-gray-700 transition">← Volver al inicio</button>
             </div>
@@ -190,6 +222,7 @@
                     <button id="server2Btn" class="server-btn bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-xs font-bold transition">Server 2</button>
                     <button id="server3Btn" class="server-btn bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-xs font-bold transition">Server 3</button>
                     <button id="server4Btn" class="server-btn bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-xs font-bold transition">Server 4</button>
+                    <button id="server5Btn" class="server-btn bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-xs font-bold transition">Server 5</button>
                 </div>
                 <div class="flex gap-2">
                     <button id="langEsBtn" class="lang-btn bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-xs font-bold transition">Español</button>
@@ -197,22 +230,26 @@
                 </div>
                 <button id="closePlayerBtn" class="text-white text-2xl bg-gray-800 w-8 h-8 rounded-full hover:bg-red-600 transition">&times;</button>
             </div>
-            <div class="embed-container bg-black rounded-xl" style="min-height: 450px;">
-                <iframe id="playerIframe" src="" allowfullscreen allow="autoplay; encrypted-media" class="w-full h-[60vh] md:h-[70vh]"></iframe>
+            <div class="embed-container bg-black rounded-xl" style="min-height: 400px;">
+                <iframe id="playerIframe" src="" allowfullscreen allow="autoplay; encrypted-media" class="w-full h-[55vh] md:h-[65vh]"></iframe>
             </div>
-            <p class="text-center text-xs text-gray-400 mt-3">
-                <i class="fas fa-language text-emerald-400 mr-1"></i> Selecciona el idioma antes de reproducir. Si el video no carga, cambia de servidor.
+            <div class="audio-hint mt-3 p-2 rounded-lg text-xs text-gray-300 text-center">
+                <i class="fas fa-volume-up text-emerald-400 mr-1"></i> 
+                <strong>¿El audio está en inglés?</strong> Dentro del reproductor, busca el ícono de configuración (⚙️) o de audio (🔊) y selecciona <strong>Español Latino</strong>. Cambiar de servidor también puede ayudar.
+            </div>
+            <p class="text-center text-xs text-gray-400 mt-2">
+                <i class="fas fa-language text-emerald-400 mr-1"></i> Si el video no carga, prueba con otro servidor. 
             </p>
         </div>
     </div>
 
     <footer class="text-center text-gray-500 text-xs py-8 border-t border-gray-800 mt-10">
-        VenomStream © • Contenido proporcionado por fuentes externas • Audio en español disponible en la mayoría de servidores.
+        VenomStream © • Contenido proporcionado por fuentes externas • Para cambiar el idioma usa los botones de idioma o los ajustes del reproductor.
     </footer>
 
     <script>
         // ================= CONFIGURACIÓN =================
-        const API_KEY = 'b6f588916e25d4e0e285fcfc76541b58';   // Tu API key (funciona)
+        const API_KEY = 'b6f588916e25d4e0e285fcfc76541b58';   // Tu API key
         const BASE_IMG = 'https://image.tmdb.org/t/p/w500';
         const LANGUAGE = 'es-MX';
 
@@ -240,6 +277,7 @@
         const server2Btn = document.getElementById('server2Btn');
         const server3Btn = document.getElementById('server3Btn');
         const server4Btn = document.getElementById('server4Btn');
+        const server5Btn = document.getElementById('server5Btn');
         const langEsBtn = document.getElementById('langEsBtn');
         const langEnBtn = document.getElementById('langEnBtn');
 
@@ -319,39 +357,41 @@
             }
         };
 
-        // ========== NUEVOS SERVIDORES MÁS ESTABLES ==========
-        // Servidor 1: vidsrc.pro (con parámetros de idioma)
-        // Servidor 2: 2embed (muy confiable)
-        // Servidor 3: embed.su (alternativa)
-        // Servidor 4: multiembed.mx (buena opción)
+        // ========== SERVIDORES CON PARÁMETROS PARA ESPAÑOL ==========
         function buildEmbedUrl(serverNum, language) {
             if(!currentMediaId || !currentMediaType) return '';
             const langParam = (language === 'es') ? 'es' : 'en';
             
             switch(serverNum) {
-                case 1: // vidsrc.pro
+                case 1: // vidsrc.pro (mejor soporte)
                     if(currentMediaType === 'movie') {
                         return `https://vidsrc.pro/embed/movie/${currentMediaId}?audio_lang=${langParam}&native_audio=1&primary_audio=${langParam === 'es' ? 'latino' : 'original'}`;
                     } else {
                         return `https://vidsrc.pro/embed/tv/${currentMediaId}/1/1?audio_lang=${langParam}&native_audio=1&primary_audio=${langParam === 'es' ? 'latino' : 'original'}`;
                     }
-                case 2: // 2embed (dominio estable)
+                case 2: // 2embed
                     if(currentMediaType === 'movie') {
-                        return `https://www.2embed.cc/embed/${currentMediaId}`;
+                        return `https://www.2embed.cc/embed/${currentMediaId}?lang=${langParam}`;
                     } else {
-                        return `https://www.2embed.cc/embedtv/${currentMediaId}&s=1&e=1`;
+                        return `https://www.2embed.cc/embedtv/${currentMediaId}&s=1&e=1&lang=${langParam}`;
                     }
-                case 3: // embed.su
+                case 3: // vidsrc.cc
                     if(currentMediaType === 'movie') {
-                        return `https://embed.su/embed/movie/${currentMediaId}`;
+                        return `https://vidsrc.cc/v2/embed/movie/${currentMediaId}?audio_lang=${langParam}&primary_audio=${langParam === 'es' ? 'latino' : 'original'}`;
                     } else {
-                        return `https://embed.su/embed/tv/${currentMediaId}/1/1`;
+                        return `https://vidsrc.cc/v2/embed/tv/${currentMediaId}/1/1?audio_lang=${langParam}&primary_audio=${langParam === 'es' ? 'latino' : 'original'}`;
                     }
                 case 4: // multiembed.mx
                     if(currentMediaType === 'movie') {
                         return `https://multiembed.mx/?video_id=${currentMediaId}&tmdb=1&lang=${langParam}`;
                     } else {
                         return `https://multiembed.mx/?video_id=${currentMediaId}&tmdb=1&season=1&episode=1&lang=${langParam}`;
+                    }
+                case 5: // autoembed.co
+                    if(currentMediaType === 'movie') {
+                        return `https://autoembed.co/movie/tmdb/${currentMediaId}?lang=${langParam}`;
+                    } else {
+                        return `https://autoembed.co/tv/tmdb/${currentMediaId}/1/1?lang=${langParam}`;
                     }
                 default:
                     return '';
@@ -361,7 +401,8 @@
         let currentServer = 1;
         function setServer(serverNum) {
             currentServer = serverNum;
-            [server1Btn, server2Btn, server3Btn, server4Btn].forEach((btn, idx) => {
+            const btns = [server1Btn, server2Btn, server3Btn, server4Btn, server5Btn];
+            btns.forEach((btn, idx) => {
                 if(idx+1 === serverNum) {
                     btn.classList.add('active', 'bg-emerald-500', 'text-black');
                     btn.classList.remove('bg-gray-800');
@@ -412,14 +453,14 @@
         server2Btn.onclick = () => setServer(2);
         server3Btn.onclick = () => setServer(3);
         server4Btn.onclick = () => setServer(4);
+        server5Btn.onclick = () => setServer(5);
         langEsBtn.onclick = () => setLanguage('es');
         langEnBtn.onclick = () => setLanguage('en');
 
-        // Inicializar servidor e idioma por defecto
         setServer(1);
         setLanguage('es');
 
-        // ================= CARRUSELES CON SWIPER Y FLECHAS =================
+        // ================= CARRUSELES CON SWIPER =================
         async function fetchCategory(endpoint, label, key) {
             const url = `https://api.themoviedb.org/3/${endpoint}?api_key=${API_KEY}&language=${LANGUAGE}&page=1`;
             const res = await fetch(url);
@@ -468,7 +509,6 @@
 
         let swiperInstances = [];
         function initAllSwipers() {
-            // Destruir instancias anteriores para evitar duplicados
             swiperInstances.forEach(sw => sw.destroy(true, true));
             swiperInstances = [];
             document.querySelectorAll('[class^="swiper-"]').forEach(container => {
@@ -567,7 +607,6 @@
                 homeContainer.classList.add('hidden');
                 searchSection.classList.remove('hidden');
                 clearSearchBtn.classList.remove('hidden');
-                // Bind eventos en resultados
                 document.querySelectorAll('#searchGrid .movie-card').forEach(card => {
                     card.removeEventListener('click', card._searchListener);
                     const listener = async (e) => {
@@ -599,7 +638,6 @@
         clearSearchBtn.onclick = resetToHome;
         closeSearchBtn.onclick = resetToHome;
 
-        // Inicializar
         loadHome();
     </script>
 </body>
