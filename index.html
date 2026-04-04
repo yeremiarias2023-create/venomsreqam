@@ -1,75 +1,237 @@
-<script>
-// --- CONFIGURACIÓN ---
-const API_KEY = '9687248249326410'; // Tu API Key detectada
-const LANG = 'es-MX'; // Cambia a 'es-ES' si prefieres español de España
-const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VenomStream</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .poster { transition: all 0.3s; }
+    .poster:hover { transform: scale(1.08); box-shadow: 0 0 25px rgba(185, 28, 28, 0.7); }
+    .modal { animation: modalPop 0.3s ease-out; }
+    @keyframes modalPop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  </style>
+</head>
+<body class="bg-zinc-950 text-white min-h-screen pb-20">
+  <!-- Header -->
+  <div class="bg-black sticky top-0 z-50 border-b border-zinc-800">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <h1 class="text-4xl font-bold tracking-tighter text-red-600 flex items-center gap-2">
+        🐍 VenomStream
+      </h1>
+      <div class="flex-1 max-w-md mx-6">
+        <input id="searchInput" 
+               class="w-full bg-zinc-900 border border-zinc-700 focus:border-red-600 rounded-3xl px-6 py-3 text-lg outline-none"
+               placeholder="Buscar películas o series...">
+      </div>
+      <button onclick="buscar()" class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-3xl">
+        <i class="fas fa-search text-xl"></i>
+      </button>
+    </div>
+  </div>
 
-// Función para abrir el reproductor (Embed de terceros)
-function abrirReproductor(id, tipo) {
-    // Usamos un servidor de Video Embed que soporta IDs de TMDB
-    // Nota: Estos servidores suelen tener publicidad propia.
-    const playerUrl = `https://vidsrc.to/embed/${tipo}/${id}`; 
-    
-    // Creamos un modal simple para el video
-    const videoHTML = `
-        <div id="video-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-            <button onclick="document.getElementById('video-modal').remove()" style="margin-bottom:10px;padding:10px 20px;background:#d60043;color:white;border:none;cursor:pointer;border-radius:5px;">CERRAR REPRODUCTOR</button>
-            <iframe src="${playerUrl}" width="80%" height="70%" frameborder="0" allowfullscreen></iframe>
-        </div>`;
-    document.body.insertAdjacentHTML('beforeend', videoHTML);
-}
+  <!-- Contenido principal -->
+  <div class="max-w-7xl mx-auto px-4" id="mainContent">
+    <div id="homeContent">
+      <!-- Secciones como Xuper -->
+      <div id="trendingSection"></div>
+      <div id="popularMoviesSection"></div>
+      <div id="popularSeriesSection"></div>
+      <div id="topRatedSection"></div>
+    </div>
+  </div>
 
-// --- FUNCIÓN PARA CREAR EL DISEÑO (Peliculas y Series) ---
-function crearCard(item, esSerie = false) {
-    const titulo = esSerie ? item.name : item.title;
-    const tipo = esSerie ? 'tv' : 'movie';
-    const id = item.id;
+  <!-- Bottom Navigation -->
+  <div class="fixed bottom-0 left-0 right-0 bg-black border-t border-zinc-800 z-50">
+    <div class="max-w-7xl mx-auto grid grid-cols-4 text-center text-sm py-2">
+      <button onclick="cambiarSeccion('home')" class="flex flex-col items-center text-red-500">
+        <i class="fas fa-home text-2xl"></i>
+        <span>Inicio</span>
+      </button>
+      <button onclick="cambiarSeccion('movies')" class="flex flex-col items-center">
+        <i class="fas fa-film text-2xl"></i>
+        <span>Películas</span>
+      </button>
+      <button onclick="cambiarSeccion('series')" class="flex flex-col items-center">
+        <i class="fas fa-tv text-2xl"></i>
+        <span>Series</span>
+      </button>
+      <button onclick="cambiarSeccion('search')" class="flex flex-col items-center">
+        <i class="fas fa-search text-2xl"></i>
+        <span>Buscar</span>
+      </button>
+    </div>
+  </div>
 
-    return `
-    <div class="crd">
-      <div class="crd__image">
-        <img src="${IMG_BASE}${item.poster_path}" alt="${titulo}" onerror="this.src='https://via.placeholder.com/500x750?text=No+Image'">
-        <div class="play" onclick="abrirReproductor(${id}, '${tipo}')">
-            <i class="fa-solid fa-play"></i> VER AHORA (ES)
+  <!-- Modal de detalle + reproductores -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[100] px-4">
+    <div class="modal bg-zinc-900 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+      <div class="relative">
+        <button onclick="cerrarModal()" class="absolute top-4 right-4 text-3xl text-white z-10">✕</button>
+        
+        <div id="modalPoster" class="h-80 bg-cover bg-center"></div>
+        
+        <div class="p-6">
+          <h2 id="modalTitle" class="text-3xl font-bold mb-2"></h2>
+          <div class="flex items-center gap-4 text-sm text-zinc-400 mb-4">
+            <span id="modalYear"></span>
+            <span id="modalRating" class="flex items-center gap-1"></span>
+          </div>
+          <p id="modalOverview" class="text-zinc-300 leading-relaxed mb-8"></p>
+
+          <!-- Reproductores (como King Red) -->
+          <h3 class="text-xl font-semibold mb-4 text-red-500">🎬 Opciones de Reproductores</h3>
+          <div class="grid grid-cols-2 gap-4" id="reproductoresContainer">
+            <!-- Se llenan con JS -->
+          </div>
         </div>
       </div>
-      <div class="crd__body">
-        <h2 class="crd__title">${titulo}</h2>
-      </div>
-    </div>`;
-}
+    </div>
+  </div>
 
-// --- CARGA INICIAL ---
-async function cargarContenido() {
-    const container = document.querySelector('.wgts-pp');
-    if (!container) return;
+  <script>
+    const API_KEY = "B6f588916e25d4e0e285fcfc76541b58";
+    const BASE_URL = "https://api.themoviedb.org/3";
+    let currentTipo = 'movie';
 
-    try {
-        // Pedimos Películas y Series populares al mismo tiempo
-        const [resPelis, resSeries] = await Promise.all([
-            fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=${LANG}`),
-            fetch(`https://api.themoviedb.org/3/tv/popular?api_key=${API_KEY}&language=${LANG}`)
-        ]);
-
-        const dataPelis = await resPelis.json();
-        const dataSeries = await resSeries.json();
-
-        container.innerHTML = ''; // Limpiar diseño anterior
-
-        // Mostrar las primeras 10 Películas
-        dataPelis.results.slice(0, 10).forEach(p => {
-            container.innerHTML += crearCard(p, false);
-        });
-
-        // Mostrar las primeras 10 Series
-        dataSeries.results.slice(0, 10).forEach(s => {
-            container.innerHTML += crearCard(s, true);
-        });
-
-    } catch (error) {
-        console.error("Error cargando TMDB:", error);
+    async function fetchData(url) {
+      try {
+        const res = await fetch(url);
+        return await res.json();
+      } catch { return { results: [] }; }
     }
-}
 
-document.addEventListener('DOMContentLoaded', cargarContenido);
-</script>
+    function mostrarSeccion(items, containerId, titulo) {
+      let html = `<h2 class="text-2xl font-bold mt-8 mb-4 px-1">${titulo}</h2>
+                  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">`;
+      
+      items.forEach(item => {
+        if (!item.poster_path) return;
+        const tipo = item.media_type || (item.title ? 'movie' : 'tv');
+        const nombre = item.title || item.name || 'Sin título';
+        const poster = `https://image.tmdb.org/t/p/w500${item.poster_path}`;
+        
+        html += `
+          <div onclick="abrirDetalle(\( {item.id}, ' \){tipo}')" class="cursor-pointer">
+            <img src="\( {poster}" class="poster rounded-2xl w-full aspect-[2/3] object-cover" alt=" \){nombre}">
+            <p class="mt-3 text-sm font-medium line-clamp-2">${nombre}</p>
+          </div>`;
+      });
+      html += `</div>`;
+      document.getElementById(containerId).innerHTML = html;
+    }
+
+    async function cargarHome() {
+      // Tendencias
+      const trend = await fetchData(`\( {BASE_URL}/trending/all/week?api_key= \){API_KEY}&language=es-ES`);
+      mostrarSeccion(trend.results, 'trendingSection', '🔥 En Tendencia');
+
+      // Películas populares
+      const popMovies = await fetchData(`\( {BASE_URL}/movie/popular?api_key= \){API_KEY}&language=es-ES`);
+      mostrarSeccion(popMovies.results, 'popularMoviesSection', '🎥 Películas Populares');
+
+      // Series populares
+      const popSeries = await fetchData(`\( {BASE_URL}/tv/popular?api_key= \){API_KEY}&language=es-ES`);
+      mostrarSeccion(popSeries.results, 'popularSeriesSection', '📺 Series del Momento');
+
+      // Top Rated
+      const top = await fetchData(`\( {BASE_URL}/movie/top_rated?api_key= \){API_KEY}&language=es-ES`);
+      mostrarSeccion(top.results, 'topRatedSection', '🏆 Top IMDB');
+    }
+
+    async function abrirDetalle(id, tipo) {
+      currentTipo = tipo;
+      const data = await fetchData(`\( {BASE_URL}/ \){tipo}/\( {id}?api_key= \){API_KEY}&language=es-ES`);
+      
+      document.getElementById('modalTitle').textContent = data.title || data.name;
+      document.getElementById('modalYear').textContent = (data.release_date || data.first_air_date || '').slice(0,4);
+      document.getElementById('modalRating').innerHTML = `⭐ ${data.vote_average ? data.vote_average.toFixed(1) : 'N/A'}`;
+      document.getElementById('modalOverview').textContent = data.overview || 'Sin sinopsis disponible.';
+      document.getElementById('modalPoster').style.backgroundImage = `url(https://image.tmdb.org/t/p/original${data.poster_path})`;
+
+      // Opciones de reproductores (estilo King Red)
+      const container = document.getElementById('reproductoresContainer');
+      container.innerHTML = `
+        <div onclick="abrirReproductor(1)" class="bg-zinc-800 hover:bg-red-600 rounded-2xl p-4 text-center cursor-pointer transition-all">
+          <div class="text-2xl mb-2">📱</div>
+          <p class="font-semibold">Reproductor 1 - HD</p>
+          <p class="text-xs text-zinc-400">VLC Player</p>
+        </div>
+        <div onclick="abrirReproductor(2)" class="bg-zinc-800 hover:bg-red-600 rounded-2xl p-4 text-center cursor-pointer transition-all">
+          <div class="text-2xl mb-2">📱</div>
+          <p class="font-semibold">Reproductor 2 - Full HD</p>
+          <p class="text-xs text-zinc-400">MX Player</p>
+        </div>
+        <div onclick="abrirReproductor(3)" class="bg-zinc-800 hover:bg-red-600 rounded-2xl p-4 text-center cursor-pointer transition-all">
+          <div class="text-2xl mb-2">📱</div>
+          <p class="font-semibold">Reproductor 3 - Ultra</p>
+          <p class="text-xs text-zinc-400">Nova Player</p>
+        </div>
+        <div onclick="abrirReproductor(4)" class="bg-zinc-800 hover:bg-red-600 rounded-2xl p-4 text-center cursor-pointer transition-all">
+          <div class="text-2xl mb-2">📱</div>
+          <p class="font-semibold">Reproductor 4 - Rápido</p>
+          <p class="text-xs text-zinc-400">PlayerX</p>
+        </div>
+      `;
+
+      document.getElementById('modal').classList.remove('hidden');
+      document.getElementById('modal').classList.add('flex');
+    }
+
+    function cerrarModal() {
+      const modal = document.getElementById('modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function abrirReproductor(num) {
+      cerrarModal();
+      let url = '';
+      if (num === 1) url = 'https://play.google.com/store/apps/details?id=org.videolan.vlc';
+      else if (num === 2) url = 'https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad';
+      else if (num === 3) url = 'https://play.google.com/store/apps/details?id=org.videolan.vlc'; // Nova usa VLC como base
+      else url = 'https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad';
+      
+      window.open(url, '_blank');
+      alert('✅ Abriendo en Play Store...\nInstala el reproductor y vuelve a presionar para ver el contenido.');
+    }
+
+    async function buscar() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) return;
+      const data = await fetchData(`\( {BASE_URL}/search/multi?api_key= \){API_KEY}&query=${encodeURIComponent(query)}&language=es-ES`);
+      document.getElementById('homeContent').innerHTML = `
+        <h2 class="text-2xl font-bold mt-8 mb-4">Resultados para "${query}"</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6" id="searchResults"></div>
+      `;
+      mostrarSeccion(data.results.filter(r => r.poster_path), 'searchResults', '');
+    }
+
+    function cambiarSeccion(seccion) {
+      const content = document.getElementById('mainContent');
+      if (seccion === 'home') {
+        content.innerHTML = `<div id="homeContent"></div>`;
+        document.getElementById('homeContent').innerHTML = `
+          <div id="trendingSection"></div>
+          <div id="popularMoviesSection"></div>
+          <div id="popularSeriesSection"></div>
+          <div id="topRatedSection"></div>
+        `;
+        cargarHome();
+      } else if (seccion === 'movies') {
+        content.innerHTML = `<h2 class="text-3xl font-bold mt-8">🎥 Todas las Películas</h2><div id="moviesGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"></div>`;
+        fetchData(`\( {BASE_URL}/movie/popular?api_key= \){API_KEY}&language=es-ES&page=1`).then(d => mostrarSeccion(d.results, 'moviesGrid', ''));
+      } else if (seccion === 'series') {
+        content.innerHTML = `<h2 class="text-3xl font-bold mt-8">📺 Todas las Series</h2><div id="seriesGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"></div>`;
+        fetchData(`\( {BASE_URL}/tv/popular?api_key= \){API_KEY}&language=es-ES&page=1`).then(d => mostrarSeccion(d.results, 'seriesGrid', ''));
+      } else if (seccion === 'search') {
+        document.getElementById('searchInput').focus();
+      }
+    }
+
+    // Iniciar la app
+    cargarHome();
+  </script>
+</body>
+</html>
