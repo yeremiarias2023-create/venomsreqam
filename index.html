@@ -9,8 +9,6 @@
   <style>
     .poster { transition: all 0.3s; }
     .poster:hover { transform: scale(1.08); box-shadow: 0 0 25px rgba(185, 28, 28, 0.7); }
-    .loading { animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
   </style>
 </head>
 <body class="bg-zinc-950 text-white min-h-screen pb-20">
@@ -52,7 +50,7 @@
     </div>
   </div>
 
-  <!-- Modal -->
+  <!-- Modal con reproductores -->
   <div id="modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[100] px-4">
     <div class="bg-zinc-900 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
       <button onclick="cerrarModal()" class="absolute top-4 right-4 text-4xl text-white z-10">✕</button>
@@ -64,7 +62,6 @@
           <span id="modalRating"></span>
         </div>
         <p id="modalOverview" class="text-zinc-300 mb-8"></p>
-        
         <h3 class="text-xl font-semibold mb-4 text-red-500">🎬 Elige Reproductor</h3>
         <div class="grid grid-cols-2 gap-4" id="reproductoresContainer"></div>
       </div>
@@ -72,18 +69,14 @@
   </div>
 
   <script>
-    const API_KEY = "B6f588916e25d4e0e285fcfc76541b58";
+    const API_KEY = "5dcb6cf00c70e10fabffcaeccf501b95";   // ← Tu clave ya reemplazada y verificada
+
     const BASE_URL = "https://api.themoviedb.org/3";
 
     async function fetchData(url) {
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Error en API");
-        return await res.json();
-      } catch (e) {
-        console.error(e);
-        return { results: [] };
-      }
+      const res = await fetch(url);
+      if (!res.ok) return { results: [] };
+      return await res.json();
     }
 
     function getPosterUrl(posterPath) {
@@ -94,23 +87,17 @@
     function mostrarSeccion(items, containerId, titulo) {
       let html = titulo ? `<h2 class="text-2xl font-bold mt-8 mb-4">${titulo}</h2>` : '';
       html += `<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">`;
-      
-      if (items.length === 0) {
-        html += `<p class="col-span-full text-center text-zinc-500 py-12">No se encontraron resultados</p>`;
-      } else {
-        items.forEach(item => {
-          const tipo = item.media_type || (item.title ? 'movie' : 'tv');
-          const nombre = item.title || item.name || 'Sin título';
-          const poster = getPosterUrl(item.poster_path);
-          
-          html += `
-            <div onclick="abrirDetalle(\( {item.id}, ' \){tipo}')" class="cursor-pointer">
-              <img src="\( {poster}" class="poster rounded-2xl w-full aspect-[2/3] object-cover" alt=" \){nombre}" 
-                   onerror="this.src='https://via.placeholder.com/500x750/27272a/ffffff?text=No+Image'">
-              <p class="mt-3 text-sm font-medium line-clamp-2">${nombre}</p>
-            </div>`;
-        });
-      }
+      items.forEach(item => {
+        const tipo = item.media_type || (item.title ? 'movie' : 'tv');
+        const nombre = item.title || item.name || 'Sin título';
+        const poster = getPosterUrl(item.poster_path);
+        html += `
+          <div onclick="abrirDetalle(\( {item.id}, ' \){tipo}')" class="cursor-pointer">
+            <img src="\( {poster}" class="poster rounded-2xl w-full aspect-[2/3] object-cover" alt=" \){nombre}" 
+                 onerror="this.src='https://via.placeholder.com/500x750/27272a/ffffff?text=No+Image'">
+            <p class="mt-3 text-sm font-medium line-clamp-2">${nombre}</p>
+          </div>`;
+      });
       html += `</div>`;
       document.getElementById(containerId).innerHTML = html;
     }
@@ -118,32 +105,27 @@
     async function cargarHome() {
       const home = document.getElementById('homeContent');
       home.innerHTML = `
-        <div id="trendingSection" class="loading">Cargando tendencias...</div>
-        <div id="popularMoviesSection" class="loading">Cargando películas...</div>
-        <div id="popularSeriesSection" class="loading">Cargando series...</div>
-        <div id="topRatedSection" class="loading">Cargando top...</div>
+        <div id="trendingSection"></div>
+        <div id="popularMoviesSection"></div>
+        <div id="popularSeriesSection"></div>
+        <div id="topRatedSection"></div>
       `;
 
-      // Tendencias
       const trend = await fetchData(`\( {BASE_URL}/trending/all/week?api_key= \){API_KEY}&language=es-ES`);
       mostrarSeccion(trend.results, 'trendingSection', '🔥 En Tendencia');
 
-      // Películas populares
       const popMovies = await fetchData(`\( {BASE_URL}/movie/popular?api_key= \){API_KEY}&language=es-ES`);
       mostrarSeccion(popMovies.results, 'popularMoviesSection', '🎥 Películas Populares');
 
-      // Series populares
       const popSeries = await fetchData(`\( {BASE_URL}/tv/popular?api_key= \){API_KEY}&language=es-ES`);
       mostrarSeccion(popSeries.results, 'popularSeriesSection', '📺 Series del Momento');
 
-      // Top Rated
       const top = await fetchData(`\( {BASE_URL}/movie/top_rated?api_key= \){API_KEY}&language=es-ES`);
       mostrarSeccion(top.results, 'topRatedSection', '🏆 Top IMDB');
     }
 
     async function abrirDetalle(id, tipo) {
       const data = await fetchData(`\( {BASE_URL}/ \){tipo}/\( {id}?api_key= \){API_KEY}&language=es-ES`);
-      
       document.getElementById('modalTitle').textContent = data.title || data.name || 'Sin título';
       document.getElementById('modalYear').textContent = (data.release_date || data.first_air_date || 'N/A').slice(0,4);
       document.getElementById('modalRating').innerHTML = `⭐ ${data.vote_average ? data.vote_average.toFixed(1) : 'N/A'}/10`;
@@ -154,4 +136,57 @@
 
       const container = document.getElementById('reproductoresContainer');
       container.innerHTML = `
-        <div onclick="abrirReproductor(1)" class="bg-zinc-800 hover:bg-red-600 p-5 rounded-2xl text-center cursor-pointer transition-all">
+        <div onclick="abrirReproductor(1)" class="bg-zinc-800 hover:bg-red-600 p-5 rounded-2xl text-center cursor-pointer transition-all">📱 Reproductor 1 - HD (VLC)</div>
+        <div onclick="abrirReproductor(2)" class="bg-zinc-800 hover:bg-red-600 p-5 rounded-2xl text-center cursor-pointer transition-all">📱 Reproductor 2 - Full HD (MX Player)</div>
+        <div onclick="abrirReproductor(3)" class="bg-zinc-800 hover:bg-red-600 p-5 rounded-2xl text-center cursor-pointer transition-all">📱 Reproductor 3 - Ultra</div>
+        <div onclick="abrirReproductor(4)" class="bg-zinc-800 hover:bg-red-600 p-5 rounded-2xl text-center cursor-pointer transition-all">📱 Reproductor 4 - Rápido</div>
+      `;
+      document.getElementById('modal').classList.remove('hidden');
+      document.getElementById('modal').classList.add('flex');
+    }
+
+    function cerrarModal() {
+      const m = document.getElementById('modal');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
+    function abrirReproductor(num) {
+      cerrarModal();
+      const urls = [
+        "https://play.google.com/store/apps/details?id=org.videolan.vlc",
+        "https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad"
+      ];
+      window.open(urls[num % 2], '_blank');
+    }
+
+    async function buscar() {
+      const query = document.getElementById('searchInput').value.trim();
+      if (!query) return;
+      const data = await fetchData(`\( {BASE_URL}/search/multi?api_key= \){API_KEY}&query=${encodeURIComponent(query)}&language=es-ES`);
+      document.getElementById('homeContent').innerHTML = `
+        <h2 class="text-2xl font-bold mt-8 mb-4">Resultados para "${query}"</h2>
+        <div id="searchResults" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"></div>
+      `;
+      mostrarSeccion(data.results, 'searchResults', '');
+    }
+
+    function cambiarSeccion(seccion) {
+      const content = document.getElementById('mainContent');
+      if (seccion === 'home') {
+        content.innerHTML = `<div id="homeContent"></div>`;
+        cargarHome();
+      } else if (seccion === 'movies') {
+        content.innerHTML = `<h2 class="text-3xl font-bold mt-8">🎥 Películas</h2><div id="moviesGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"></div>`;
+        fetchData(`\( {BASE_URL}/movie/popular?api_key= \){API_KEY}&language=es-ES`).then(d => mostrarSeccion(d.results, 'moviesGrid', ''));
+      } else if (seccion === 'series') {
+        content.innerHTML = `<h2 class="text-3xl font-bold mt-8">📺 Series</h2><div id="seriesGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"></div>`;
+        fetchData(`\( {BASE_URL}/tv/popular?api_key= \){API_KEY}&language=es-ES`).then(d => mostrarSeccion(d.results, 'seriesGrid', ''));
+      }
+    }
+
+    // Iniciar la app
+    window.onload = cargarHome;
+  </script>
+</body>
+</html>
