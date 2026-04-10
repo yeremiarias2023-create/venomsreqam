@@ -7,95 +7,127 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    .poster { transition: all 0.3s; }
-    .poster:hover { transform: scale(1.08); box-shadow: 0 0 25px rgba(185, 28, 28, 0.7); }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .poster { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .poster:hover { transform: scale(1.08); box-shadow: 0 0 30px rgba(234, 179, 8, 0.5); }
+    .sidebar-icon { transition: all 0.2s; }
+    .sidebar-icon:hover { color: #eab308; transform: scale(1.15); }
+    .top-bar { background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px); }
   </style>
 </head>
-<body class="bg-zinc-950 text-white min-h-screen pb-20">
+<body class="bg-zinc-950 text-white min-h-screen overflow-hidden">
 
-  <!-- Header -->
-  <div class="bg-black sticky top-0 z-50 border-b border-zinc-800">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-      <h1 class="text-4xl font-bold tracking-tighter text-red-600 flex items-center gap-2">
-        🐍 VenomStream
-      </h1>
-      <div class="flex-1 max-w-md mx-6">
-        <input id="searchInput" class="w-full bg-zinc-900 border border-zinc-700 focus:border-red-600 rounded-3xl px-6 py-3 text-lg outline-none" placeholder="Buscar películas o series...">
-      </div>
-      <button onclick="buscar()" class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-3xl">
-        <i class="fas fa-search text-xl"></i>
-      </button>
+  <!-- SIDEBAR IZQUIERDO (exacto como DonIPTV) -->
+  <div class="fixed left-0 top-0 bottom-0 w-16 bg-black flex flex-col items-center py-6 border-r border-zinc-800 z-50">
+    <div class="mb-10">
+      <div class="w-10 h-10 bg-yellow-400 rounded-2xl flex items-center justify-center text-black font-bold text-2xl">🐍</div>
+    </div>
+    <div class="space-y-8 flex-1">
+      <a onclick="cambiarSeccion('home')" class="sidebar-icon flex flex-col items-center text-yellow-400 text-3xl cursor-pointer"><i class="fas fa-home"></i></a>
+      <a onclick="cambiarSeccion('movies')" class="sidebar-icon flex flex-col items-center text-3xl cursor-pointer"><i class="fas fa-film"></i></a>
+      <a onclick="cambiarSeccion('series')" class="sidebar-icon flex flex-col items-center text-3xl cursor-pointer"><i class="fas fa-tv"></i></a>
+      <a class="sidebar-icon flex flex-col items-center text-3xl cursor-pointer"><i class="fas fa-search"></i></a>
+      <a class="sidebar-icon flex flex-col items-center text-3xl cursor-pointer"><i class="fas fa-heart"></i></a>
+    </div>
+    <div class="mt-auto flex flex-col items-center gap-6 text-2xl">
+      <i class="fas fa-cog cursor-pointer"></i>
+      <i class="fas fa-user-circle cursor-pointer"></i>
     </div>
   </div>
 
-  <div class="max-w-7xl mx-auto px-4" id="mainContent">
+  <!-- BARRA SUPERIOR (con hora en tiempo real) -->
+  <div class="top-bar fixed left-16 right-0 top-0 h-14 flex items-center px-6 z-50 border-b border-zinc-800">
+    <div class="flex-1 flex items-center gap-3">
+      <h1 class="text-3xl font-bold tracking-tighter text-yellow-400 flex items-center gap-2">
+        VenomStream
+      </h1>
+    </div>
+
+    <!-- Hora en tiempo real (esquina superior) -->
+    <div id="liveClock" class="text-lg font-medium bg-zinc-900 px-5 py-1 rounded-3xl border border-yellow-400/30 flex items-center gap-2 text-yellow-300">
+      <i class="fas fa-clock"></i>
+      <span id="timeDisplay">08:01:25 PM</span>
+    </div>
+
+    <!-- Botones como DonIPTV -->
+    <div class="flex items-center gap-4 ml-8">
+      <button onclick="alert('TV Guide (próximamente)')" class="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 px-6 py-2 rounded-3xl text-sm font-medium">
+        <i class="fas fa-tv"></i> TV GUIDE
+      </button>
+      <button onclick="alert('Grabación (próximamente)')" class="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 px-6 py-2 rounded-3xl text-sm font-medium">
+        <i class="fas fa-record-vinyl"></i> REC
+      </button>
+      <button onclick="alert('VPN activada')" class="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 px-6 py-2 rounded-3xl text-sm font-medium">
+        <i class="fas fa-shield-alt"></i> VPN
+      </button>
+      <button onclick="alert('Mensajes (próximamente)')" class="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 px-6 py-2 rounded-3xl text-sm font-medium">
+        <i class="fas fa-envelope"></i> MSG
+      </button>
+      <button onclick="alert('Actualizando...')" class="flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 px-6 py-2 rounded-3xl text-sm font-medium">
+        <i class="fas fa-sync"></i> UPDATE
+      </button>
+    </div>
+
+    <div class="ml-6 text-xs text-zinc-400">
+      <span id="dateDisplay"></span>
+    </div>
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="ml-16 pt-14 p-8" id="mainContent">
     <div id="homeContent"></div>
   </div>
 
-  <!-- Bottom Navigation -->
-  <div class="fixed bottom-0 left-0 right-0 bg-black border-t border-zinc-800 z-50">
-    <div class="max-w-7xl mx-auto grid grid-cols-4 text-center text-sm py-2">
-      <button onclick="cambiarSeccion('home')" class="flex flex-col items-center text-red-500">
-        <i class="fas fa-home text-2xl"></i><span>Inicio</span>
-      </button>
-      <button onclick="cambiarSeccion('movies')" class="flex flex-col items-center">
-        <i class="fas fa-film text-2xl"></i><span>Películas</span>
-      </button>
-      <button onclick="cambiarSeccion('series')" class="flex flex-col items-center">
-        <i class="fas fa-tv text-2xl"></i><span>Series</span>
-      </button>
-      <button onclick="cambiarSeccion('search')" class="flex flex-col items-center">
-        <i class="fas fa-search text-2xl"></i><span>Buscar</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Modal con reproductores -->
-  <div id="modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[100] px-4">
-    <div class="bg-zinc-900 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
-      <button onclick="cerrarModal()" class="absolute top-4 right-4 text-4xl text-white z-10">✕</button>
-      <div id="modalPoster" class="h-80 bg-cover bg-center bg-zinc-800"></div>
-      <div class="p-6">
-        <h2 id="modalTitle" class="text-3xl font-bold mb-2"></h2>
-        <div class="flex gap-4 text-sm text-zinc-400 mb-4">
+  <!-- MODAL DETALLE + REPRODUCTORES -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/95 flex items-center justify-center z-[100]">
+    <div class="bg-zinc-900 rounded-3xl max-w-2xl w-full mx-4 overflow-hidden">
+      <button onclick="cerrarModal()" class="absolute top-6 right-6 text-4xl text-white z-10">✕</button>
+      
+      <div id="modalPoster" class="h-80 bg-cover bg-center"></div>
+      
+      <div class="p-8">
+        <h2 id="modalTitle" class="text-4xl font-bold mb-2"></h2>
+        <div class="flex gap-4 text-sm text-zinc-400 mb-6">
           <span id="modalYear"></span>
-          <span id="modalRating"></span>
+          <span id="modalRating" class="flex items-center"></span>
         </div>
-        <p id="modalOverview" class="text-zinc-300 mb-8"></p>
-        <h3 class="text-xl font-semibold mb-4 text-red-500">🎬 Elige Reproductor</h3>
+        <p id="modalOverview" class="text-zinc-300 leading-relaxed mb-8"></p>
+
+        <h3 class="text-xl font-semibold mb-6 text-yellow-400">🎬 Elige Reproductor</h3>
         <div class="grid grid-cols-2 gap-4" id="reproductoresContainer"></div>
       </div>
     </div>
   </div>
 
   <script>
-    const API_KEY = "5dcb6cf00c70e10fabffcaeccf501b95";   // ← Tu clave ya reemplazada y verificada
-
+    const API_KEY = "5dcb6cf00c70e10fabffcaeccf501b95";
     const BASE_URL = "https://api.themoviedb.org/3";
 
     async function fetchData(url) {
-      const res = await fetch(url);
-      if (!res.ok) return { results: [] };
-      return await res.json();
+      try {
+        const res = await fetch(url);
+        return res.ok ? await res.json() : { results: [] };
+      } catch { return { results: [] }; }
     }
 
-    function getPosterUrl(posterPath) {
-      if (!posterPath) return "https://via.placeholder.com/500x750/27272a/ffffff?text=VenomStream";
-      return `https://image.tmdb.org/t/p/w342${posterPath}`;
+    function getPosterUrl(path) {
+      return path ? `https://image.tmdb.org/t/p/w342${path}` : "https://via.placeholder.com/500x750/27272a/ffffff?text=VenomStream";
     }
 
     function mostrarSeccion(items, containerId, titulo) {
-      let html = titulo ? `<h2 class="text-2xl font-bold mt-8 mb-4">${titulo}</h2>` : '';
-      html += `<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">`;
+      let html = `<h2 class="text-3xl font-bold mb-6">${titulo}</h2><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">`;
+      
       items.forEach(item => {
+        if (!item.poster_path) return;
         const tipo = item.media_type || (item.title ? 'movie' : 'tv');
         const nombre = item.title || item.name || 'Sin título';
         const poster = getPosterUrl(item.poster_path);
+        
         html += `
           <div onclick="abrirDetalle(\( {item.id}, ' \){tipo}')" class="cursor-pointer">
-            <img src="\( {poster}" class="poster rounded-2xl w-full aspect-[2/3] object-cover" alt=" \){nombre}" 
-                 onerror="this.src='https://via.placeholder.com/500x750/27272a/ffffff?text=No+Image'">
-            <p class="mt-3 text-sm font-medium line-clamp-2">${nombre}</p>
+            <img src="\( {poster}" class="poster rounded-3xl w-full aspect-[2/3] object-cover" alt=" \){nombre}">
+            <p class="mt-4 text-sm font-medium line-clamp-2">${nombre}</p>
           </div>`;
       });
       html += `</div>`;
@@ -105,27 +137,22 @@
     async function cargarHome() {
       const home = document.getElementById('homeContent');
       home.innerHTML = `
-        <div id="trendingSection"></div>
-        <div id="popularMoviesSection"></div>
-        <div id="popularSeriesSection"></div>
-        <div id="topRatedSection"></div>
+        <div id="newMoviesSection"></div>
+        <div id="newSeriesSection" class="mt-16"></div>
       `;
 
-      const trend = await fetchData(`\( {BASE_URL}/trending/all/week?api_key= \){API_KEY}&language=es-ES`);
-      mostrarSeccion(trend.results, 'trendingSection', '🔥 En Tendencia');
+      // NEW MOVIES
+      const movies = await fetchData(`\( {BASE_URL}/movie/now_playing?api_key= \){API_KEY}&language=es-ES`);
+      mostrarSeccion(movies.results, 'newMoviesSection', 'NEW MOVIES');
 
-      const popMovies = await fetchData(`\( {BASE_URL}/movie/popular?api_key= \){API_KEY}&language=es-ES`);
-      mostrarSeccion(popMovies.results, 'popularMoviesSection', '🎥 Películas Populares');
-
-      const popSeries = await fetchData(`\( {BASE_URL}/tv/popular?api_key= \){API_KEY}&language=es-ES`);
-      mostrarSeccion(popSeries.results, 'popularSeriesSection', '📺 Series del Momento');
-
-      const top = await fetchData(`\( {BASE_URL}/movie/top_rated?api_key= \){API_KEY}&language=es-ES`);
-      mostrarSeccion(top.results, 'topRatedSection', '🏆 Top IMDB');
+      // NEW TV SHOWS
+      const series = await fetchData(`\( {BASE_URL}/tv/on_the_air?api_key= \){API_KEY}&language=es-ES`);
+      mostrarSeccion(series.results, 'newSeriesSection', 'NEW TV SHOWS');
     }
 
     async function abrirDetalle(id, tipo) {
       const data = await fetchData(`\( {BASE_URL}/ \){tipo}/\( {id}?api_key= \){API_KEY}&language=es-ES`);
+      
       document.getElementById('modalTitle').textContent = data.title || data.name || 'Sin título';
       document.getElementById('modalYear').textContent = (data.release_date || data.first_air_date || 'N/A').slice(0,4);
       document.getElementById('modalRating').innerHTML = `⭐ ${data.vote_average ? data.vote_average.toFixed(1) : 'N/A'}/10`;
@@ -136,10 +163,26 @@
 
       const container = document.getElementById('reproductoresContainer');
       container.innerHTML = `
-        <div onclick="abrirReproductor(1)" class="bg-zinc-800 hover:bg-red-600 p-5 rounded-2xl text-center cursor-pointer transition-all">📱 Reproductor 1 - HD (VLC)</div>
-        <div onclick="abrirReproductor(2)" class="bg-zinc-800 hover:bg-red-600 p-5 rounded-2xl text-center cursor-pointer transition-all">📱 Reproductor 2 - Full HD (MX Player)</div>
-        <div onclick="abrirReproductor(3)" class="bg-zinc-800 hover:bg-red-600 p-5 rounded-2xl text-center cursor-pointer transition-all">📱 Reproductor 3 - Ultra</div>
-        <div onclick="abrirReproductor(4)" class="bg-zinc-800 hover:bg-red-600 p-5 rounded-2xl text-center cursor-pointer transition-all">📱 Reproductor 4 - Rápido</div>
+        <div onclick="abrirReproductor(1)" class="bg-zinc-800 hover:bg-yellow-400 hover:text-black p-6 rounded-3xl text-center cursor-pointer transition-all">
+          <div class="text-4xl mb-3">📱</div>
+          <p class="font-semibold">Reproductor 1 - HD</p>
+          <p class="text-xs text-zinc-400">VLC Player</p>
+        </div>
+        <div onclick="abrirReproductor(2)" class="bg-zinc-800 hover:bg-yellow-400 hover:text-black p-6 rounded-3xl text-center cursor-pointer transition-all">
+          <div class="text-4xl mb-3">📱</div>
+          <p class="font-semibold">Reproductor 2 - Full HD</p>
+          <p class="text-xs text-zinc-400">MX Player</p>
+        </div>
+        <div onclick="abrirReproductor(3)" class="bg-zinc-800 hover:bg-yellow-400 hover:text-black p-6 rounded-3xl text-center cursor-pointer transition-all">
+          <div class="text-4xl mb-3">📱</div>
+          <p class="font-semibold">Reproductor 3 - Ultra</p>
+          <p class="text-xs text-zinc-400">Nova Player</p>
+        </div>
+        <div onclick="abrirReproductor(4)" class="bg-zinc-800 hover:bg-yellow-400 hover:text-black p-6 rounded-3xl text-center cursor-pointer transition-all">
+          <div class="text-4xl mb-3">📱</div>
+          <p class="font-semibold">Reproductor 4 - Rápido</p>
+          <p class="text-xs text-zinc-400">PlayerX</p>
+        </div>
       `;
       document.getElementById('modal').classList.remove('hidden');
       document.getElementById('modal').classList.add('flex');
@@ -160,33 +203,49 @@
       window.open(urls[num % 2], '_blank');
     }
 
-    async function buscar() {
-      const query = document.getElementById('searchInput').value.trim();
-      if (!query) return;
-      const data = await fetchData(`\( {BASE_URL}/search/multi?api_key= \){API_KEY}&query=${encodeURIComponent(query)}&language=es-ES`);
-      document.getElementById('homeContent').innerHTML = `
-        <h2 class="text-2xl font-bold mt-8 mb-4">Resultados para "${query}"</h2>
-        <div id="searchResults" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"></div>
-      `;
-      mostrarSeccion(data.results, 'searchResults', '');
-    }
-
     function cambiarSeccion(seccion) {
       const content = document.getElementById('mainContent');
       if (seccion === 'home') {
         content.innerHTML = `<div id="homeContent"></div>`;
         cargarHome();
       } else if (seccion === 'movies') {
-        content.innerHTML = `<h2 class="text-3xl font-bold mt-8">🎥 Películas</h2><div id="moviesGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"></div>`;
+        content.innerHTML = `<h2 class="text-3xl font-bold mb-6">🎥 Todas las Películas</h2><div id="moviesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"></div>`;
         fetchData(`\( {BASE_URL}/movie/popular?api_key= \){API_KEY}&language=es-ES`).then(d => mostrarSeccion(d.results, 'moviesGrid', ''));
       } else if (seccion === 'series') {
-        content.innerHTML = `<h2 class="text-3xl font-bold mt-8">📺 Series</h2><div id="seriesGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"></div>`;
+        content.innerHTML = `<h2 class="text-3xl font-bold mb-6">📺 Todas las Series</h2><div id="seriesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"></div>`;
         fetchData(`\( {BASE_URL}/tv/popular?api_key= \){API_KEY}&language=es-ES`).then(d => mostrarSeccion(d.results, 'seriesGrid', ''));
       }
     }
 
-    // Iniciar la app
-    window.onload = cargarHome;
+    // RELOJ EN TIEMPO REAL
+    function actualizarReloj() {
+      const timeEl = document.getElementById('timeDisplay');
+      const dateEl = document.getElementById('dateDisplay');
+      
+      setInterval(() => {
+        const now = new Date();
+        // Hora en formato 12h como en DonIPTV
+        timeEl.textContent = now.toLocaleTimeString('es-PE', { 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          second: '2-digit',
+          hour12: true 
+        }).toUpperCase();
+        
+        // Fecha
+        dateEl.textContent = now.toLocaleDateString('es-PE', {
+          weekday: 'short',
+          day: 'numeric',
+          month: 'short'
+        }).toUpperCase();
+      }, 1000);
+    }
+
+    // INICIAR TODO
+    window.onload = () => {
+      actualizarReloj();
+      cargarHome();
+    };
   </script>
 </body>
 </html>
